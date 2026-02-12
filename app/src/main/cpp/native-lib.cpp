@@ -47,7 +47,28 @@ void hello() {
     blue = random_number();
 }
 
-void setup() {
+void fps_counter(float delta) {
+    frameCount++;
+
+    if (SDL_GetTicks() - fpsTimer >= 1000) {
+        LOGI("FPS: %d \nDELTA : %f", frameCount, delta);
+
+        frameCount = 0;
+        fpsTimer = SDL_GetTicks();
+    }
+
+}
+
+float delta_fun() {
+
+    Uint32 now = SDL_GetTicks();
+    float  delta = (now - lastframetime) / 1000.0f;
+    lastframetime = now;
+    //        delta = SDL_clamp(delta, 0.0f, 0.05f);
+    return delta;
+}
+
+void setup(Sprite player ,float delta) {
 
 //    canvas
     SDL_SetRenderDrawColor(ren, 100, 255, 2, 255);
@@ -62,7 +83,10 @@ void setup() {
     SDL_RenderCopy(ren, texture, NULL, &ball);
     //player
 
-//    SDL_RenderPresent(ren);
+    player.update(delta);  // animation update
+    player.render(ren);   // draw on screen
+
+    SDL_RenderPresent(ren);
 
 }
 
@@ -165,7 +189,6 @@ extern "C" int SDL_main(int argc, char *argv[]) {
                                        640, 480,
                                        SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN);
 
-
     if (!win) {
         LOGI("SDL_CreateWindow Error: %s", SDL_GetError());
         SDL_Quit();
@@ -173,8 +196,6 @@ extern "C" int SDL_main(int argc, char *argv[]) {
     }
 
     ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED);
-
-
     if (!ren) {
         SDL_DestroyWindow(win);
         LOGI("SDL_CreateRenderer Error: %s", SDL_GetError());
@@ -191,24 +212,10 @@ extern "C" int SDL_main(int argc, char *argv[]) {
     LOGI("joystick FOUND : %s", SDL_JoystickName(joystick));
     LOGI("joystick connected : %d", SDL_JoystickInstanceID(joystick));
 
-
-    // Main loop (render red screen)
     bool running = true;
     SDL_Event e;
 
-
-    ball.y = 200;
-    ball.x = 250;
-    ball.w = 500;
-    ball.h = 500;
-
-//    surface= SDL_LoadBMP("player/mario.bmp");
-
-//    surface= IMG_Load("player/sprites/luigi.png");
-//    SDL_Texture* playerTex = IMG_LoadTexture(ren, "player/sprites/luigi.png");
-
     IMG_Init(IMG_INIT_PNG);
-
 
     bg = SDL_LoadBMP("background/background2.bmp");
 
@@ -217,16 +224,10 @@ extern "C" int SDL_main(int argc, char *argv[]) {
 
     // Create Sprite object
     Sprite player(playerTexture, 100, 100, 64, 64);
-
-
-
     // x=100, y=100, frame width=64, height=64
 
     player.addAnimation("idle", 1, 4, 2.1f); // row 0, 4 frames, 0.1s per frame
-    player.addAnimation("walk", 0, 3, 0.23); // row 0, 4 frames, 0.1s per frame
-
-    player.play("idle");
-
+    player.addAnimation("walk", 0, 3, 0.2f); // row 0, 4 frames, 0.1s per frame ( less speed value=== fash animetion play like 0.1f)
 
     if (!playerTexture) {
         LOGI("Failed to load playerr texture : %s", SDL_GetError());
@@ -238,42 +239,21 @@ extern "C" int SDL_main(int argc, char *argv[]) {
         return 1;
     }
 
-
-//   / texture= IMG_LoadTexture(ren, "player/sprites/luigi.png");;
-
     bg_texture = SDL_CreateTextureFromSurface(ren, bg);
 
-//    if(!texture || !bg_texture){
-//        LOGI("Failed to load Texture: %s", SDL_GetError());
-//        return 1;
-//    }
 
     SDL_FreeSurface(surface);
     SDL_FreeSurface(bg);
-
-
     lastframetime = SDL_GetTicks();
     fpsTimer = SDL_GetTicks();
+
+    //main game loop
     while (running) {
-//        LOGI("%d",player_flip);
-//        delta
-        Uint32 now = SDL_GetTicks();
-        float delta = (now - lastframetime) / 1000.0f;
-        lastframetime = now;
 
-//        delta = SDL_clamp(delta, 0.0f, 0.05f);
-//        delta
+        float  delta = delta_fun();
+        fps_counter(delta);
 
-//fps
-        frameCount++;
-
-        if (SDL_GetTicks() - fpsTimer >= 1000) {
-            LOGI("FPS: %d \nDELTA : %f", frameCount, delta);
-            frameCount = 0;
-            fpsTimer = SDL_GetTicks();
-        }
-//fps
-
+        //loop for events
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) running = false;
 
@@ -285,38 +265,26 @@ extern "C" int SDL_main(int argc, char *argv[]) {
             if (e.type == SDL_JOYBUTTONUP) {
                 button_pressed = false;
 //                LOGI("JOYSTICK Button up %d ", e.jbutton.button);
-
-
             }
             if (e.type == SDL_JOYBUTTONDOWN) {
-
                 button_pressed = true;
-//                LOGI("button_pressed %d", e.jbutton.button);
-//                      move_button(e.jbutton.button);
                 buttonpressis = e.jbutton.button;
-//                )
+//                LOGI("JOYSTICK Button down %d ", e.jbutton.button);
             }
-
-
-
-
-//            if (e.type == SDL_FINGERDOWN){
-//                hello();
-//            };
+            if (e.type == SDL_FINGERDOWN){
+                SDL_DestroyTexture(texture);
+                SDL_DestroyTexture(bg_texture);
+                SDL_DestroyRenderer(ren);
+                SDL_DestroyWindow(win);
+                SDL_Quit();
+            };
         }
-//        SDL_RenderFillRect(ren, &rectangel);
-
-        move(buttonpressis, delta, player);
-        setup();
-
         if(button_pressed== false){
             player.play("idle");
         }
 
-//        LOGI("%d",button_pressed);
-        player.update(delta);  // animation update
-        player.render(ren);   // draw on screen
-        SDL_RenderPresent(ren);
+        move(buttonpressis, delta, player);
+        setup(player,delta);
 
     }
 
