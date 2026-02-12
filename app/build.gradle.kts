@@ -17,7 +17,6 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags += "-std=c++17"
-                arguments += "-DPKG_CONFIG_EXECUTABLE=dummy"
             }
         }
     }
