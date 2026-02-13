@@ -5,29 +5,30 @@
 #include <iostream>
 #include <SDL.h>
 #include <SDL_image.h>
+#include <string>
+
 #include "Sprite.h"
 
 
 #define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "SDL_DEMO", __VA_ARGS__))
 SDL_Renderer *ren = NULL;
+SDL_Window *win = NULL;
 SDL_Joystick *joystick = NULL;
+SDL_GameController *controller = NULL;
 SDL_Surface *surface;
 SDL_Surface *bg;
 SDL_Texture *texture;
 SDL_Texture *bg_texture;
 
-
-SDL_Rect ball;
-
-
 bool button_pressed = false;
+bool vsync = false;
 bool player_flip = false;
 Uint32 lastframetime = 0;
-int buttonpressis = 99;
+bool isMoving = false;   // har frame reset karo
 int fps = 0;
 int frameCount = 0;
 Uint32 fpsTimer = 0;
-float speed = 300.0f;
+float speed = 450.0f;
 
 
 int red = 255;
@@ -47,6 +48,39 @@ void hello() {
     blue = random_number();
 }
 
+//controler login
+void connectController(int index) {
+
+    if (!SDL_IsGameController(index)) return;
+
+    controller = SDL_GameControllerOpen(index);
+
+    if (controller) {
+        LOGI("Controller Connected: %s",
+             SDL_GameControllerName(controller));
+    }
+}
+
+
+void disconnectController(SDL_JoystickID id) {
+
+    if (!controller) return;
+
+    SDL_Joystick *joy =
+            SDL_GameControllerGetJoystick(controller);
+
+    if (SDL_JoystickInstanceID(joy) == id) {
+
+        SDL_GameControllerClose(controller);
+        controller = NULL;
+
+        LOGI("Controller Removed");
+    }
+}
+
+//controler login
+
+
 void fps_counter(float delta) {
     frameCount++;
 
@@ -62,13 +96,17 @@ void fps_counter(float delta) {
 float delta_fun() {
 
     Uint32 now = SDL_GetTicks();
-    float  delta = (now - lastframetime) / 1000.0f;
+    float delta = (now - lastframetime) / 1000.0f;
     lastframetime = now;
-    //        delta = SDL_clamp(delta, 0.0f, 0.05f);
+    delta = SDL_clamp(delta, 0.0f, 0.05f);
     return delta;
 }
 
-void setup(Sprite player ,float delta) {
+void setup(Sprite player, float delta) {
+
+
+    player.destRect.h = 250;
+    player.destRect.w = 250;
 
 //    canvas
     SDL_SetRenderDrawColor(ren, 100, 255, 2, 255);
@@ -79,11 +117,9 @@ void setup(Sprite player ,float delta) {
     SDL_RenderCopy(ren, bg_texture, NULL, NULL);
     //backgroundg
 
-    //player
-    SDL_RenderCopy(ren, texture, NULL, &ball);
-    //player
 
     player.update(delta);  // animation update
+
     player.render(ren);   // draw on screen
 
     SDL_RenderPresent(ren);
@@ -94,47 +130,61 @@ void movestick(int stick_type, int stick_value) {
     if (stick_type == 0 and stick_value > 0) {
 //        RIGHT
 ////        LOGI("RIGHT");
-        ball.x += 20;
+
 
     }
 
     if (stick_type == 1 and stick_value > 0) {
 //        DOWN
 
-        ball.y += 20;
+
     }
 
     if (stick_type == 1 and stick_value < 0) {
 //        UP MOVEMENT
 
-        ball.y -= 20;
+
     }
 
 
     if (stick_type == 0 and stick_value < 0) {
         //Left movement
 
-        ball.x -= 20;
+
     }
 
 }
 
 void move(int button_id, float delta, Sprite &player) {
 
-    player.destRect.h = 250;
-    player.destRect.w = 250;
 //    if(delta>=7.008000){delta=7.008000;}
 
-    if (button_pressed == 1 and button_id == 3) {
+    if (button_id == 3) {
         hello();
     }
-    if (button_pressed == 1 and button_id == 2) {
+
+    if (button_id == 734) {
+
+        if (vsync == false) {
+            vsync = true;
+            LOGI("vsyn on");
+            ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+        }
+        if (vsync == true) {
+            vsync = false;
+            LOGI("vsyn off");
+            ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED);
+        }
+
+    }
+
+    if (button_id == 0) {
         //reset player
         player.destRect.x = 250;
         player.destRect.y = 200;
-        player.setFlip(SDL_FLIP_HORIZONTAL);
+
     }
-    if (button_pressed == 1 and button_id == 14) {
+    if (button_id == 14) {
 //            right movement
 //        LOGI("this is %d and button is %d",button_pressed,button_id);
         if (player_flip == true) {
@@ -143,11 +193,10 @@ void move(int button_id, float delta, Sprite &player) {
             player.setFlip(SDL_FLIP_NONE);
         }
         player.play("walk");
-
         player.destRect.x += speed * delta;
-
     }
-    if (button_pressed == 1 and button_id == 13) {
+
+    if (button_id == 13) {
 //            left movement
 //        LOGI("this is %d and button is %d",button_pressed,button_id);
         if (player_flip == false) {
@@ -160,12 +209,12 @@ void move(int button_id, float delta, Sprite &player) {
         player.play("walk");
         player.destRect.x -= speed * delta;
     }
-    if (button_pressed == 1 and button_id == 11) {
+    if (button_id == 11) {
 //            up movement
 //        LOGI("this is %d and button is %d",button_pressed,button_id);
         player.destRect.y -= speed * delta;
     }
-    if (button_pressed == 1 and button_id == 12) {
+    if (button_id == 12) {
 //            down movement
 //        LOGI("this is %d and button is %d",button_pressed,button_id);
         player.destRect.y += speed * delta;
@@ -178,16 +227,16 @@ void move(int button_id, float delta, Sprite &player) {
 
 extern "C" int SDL_main(int argc, char *argv[]) {
 
-    if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER) != 0) {
         LOGI("SDL_Init Error: %s", SDL_GetError());
         return 1;
     }
 
-    SDL_Window *win = SDL_CreateWindow("SDL Demo",
-                                       SDL_WINDOWPOS_CENTERED,
-                                       SDL_WINDOWPOS_CENTERED,
-                                       640, 480,
-                                       SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN);
+    win = SDL_CreateWindow("SDL Demo",
+                           SDL_WINDOWPOS_CENTERED,
+                           SDL_WINDOWPOS_CENTERED,
+                           640, 480,
+                           SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN);
 
     if (!win) {
         LOGI("SDL_CreateWindow Error: %s", SDL_GetError());
@@ -196,6 +245,7 @@ extern "C" int SDL_main(int argc, char *argv[]) {
     }
 
     ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED);
+
     if (!ren) {
         SDL_DestroyWindow(win);
         LOGI("SDL_CreateRenderer Error: %s", SDL_GetError());
@@ -203,14 +253,15 @@ extern "C" int SDL_main(int argc, char *argv[]) {
         return 1;
     }
 
-    if (SDL_NumJoysticks() < 0) {
 
-        LOGI("JOYSTICK NOT FOUND");
-    }
-    joystick = SDL_JoystickOpen(0);
 
-    LOGI("joystick FOUND : %s", SDL_JoystickName(joystick));
-    LOGI("joystick connected : %d", SDL_JoystickInstanceID(joystick));
+
+
+//        LOGI(" FAKE joystick FOUND : %s", SDL_JoystickName(joystick));
+//    LOGI(" fale joystick connected : %d", SDL_JoystickOpen());
+//    LOGI("joystick connected : %d", SDL_JoystickInstanceID(joystick));
+
+
 
     bool running = true;
     SDL_Event e;
@@ -227,7 +278,8 @@ extern "C" int SDL_main(int argc, char *argv[]) {
     // x=100, y=100, frame width=64, height=64
 
     player.addAnimation("idle", 1, 4, 2.1f); // row 0, 4 frames, 0.1s per frame
-    player.addAnimation("walk", 0, 3, 0.2f); // row 0, 4 frames, 0.1s per frame ( less speed value=== fash animetion play like 0.1f)
+    player.addAnimation("walk", 0, 3,
+                        0.2f); // row 0, 4 frames, 0.1s per frame ( less speed value=== fash animetion play like 0.1f)
 
     if (!playerTexture) {
         LOGI("Failed to load playerr texture : %s", SDL_GetError());
@@ -250,41 +302,76 @@ extern "C" int SDL_main(int argc, char *argv[]) {
     //main game loop
     while (running) {
 
-        float  delta = delta_fun();
+        float delta = delta_fun();
         fps_counter(delta);
 
         //loop for events
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) running = false;
 
-//            if (e.type == SDL_JOYAXISMOTION) {
-//                LOGI("JOYSTICK %d moving %d", e.jaxis.axis, e.jaxis.value);
-//                movestick(e.jaxis.axis, e.jaxis.value);
-//            }
+            if (e.type == SDL_CONTROLLERDEVICEADDED)
+                connectController(e.cdevice.which);
 
-            if (e.type == SDL_JOYBUTTONUP) {
-                button_pressed = false;
-//                LOGI("JOYSTICK Button up %d ", e.jbutton.button);
-            }
-            if (e.type == SDL_JOYBUTTONDOWN) {
-                button_pressed = true;
-                buttonpressis = e.jbutton.button;
-//                LOGI("JOYSTICK Button down %d ", e.jbutton.button);
-            }
-            if (e.type == SDL_FINGERDOWN){
-                SDL_DestroyTexture(texture);
-                SDL_DestroyTexture(bg_texture);
-                SDL_DestroyRenderer(ren);
-                SDL_DestroyWindow(win);
-                SDL_Quit();
+            if (e.type == SDL_CONTROLLERDEVICEREMOVED)
+                disconnectController(e.cdevice.which);
+
+
+            if (e.type == SDL_FINGERDOWN) {
+
             };
         }
-        if(button_pressed== false){
-            player.play("idle");
+
+
+        if (controller) {
+            isMoving = false;   // har frame reset karo
+            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_UP)) {
+                move(SDL_CONTROLLER_BUTTON_DPAD_UP, delta, player);
+//                    LOGI("%d",SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
+
+                isMoving = true;   // har frame reset karo
+
+            }
+            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_DOWN)) {
+                move(SDL_CONTROLLER_BUTTON_DPAD_DOWN, delta, player);
+//                    LOGI("%d",SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
+                isMoving = true;   // har frame reset karo
+
+            }
+            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_LEFT)) {
+                move(SDL_CONTROLLER_BUTTON_DPAD_LEFT, delta, player);
+//                    LOGI("%d",SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
+                isMoving = true;   // har frame reset karo
+
+            }
+            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_RIGHT)) {
+                move(SDL_CONTROLLER_BUTTON_DPAD_RIGHT, delta, player);
+                isMoving = true;   // har frame reset karo
+
+                //                    LOGI("%d",SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
+            }
+            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_A)) {
+                move(SDL_CONTROLLER_BUTTON_A, delta, player);
+                isMoving = true;   // har frame reset karo
+
+            }
+            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_B)) {
+                move(SDL_CONTROLLER_BUTTON_B, delta, player);
+                isMoving = true;   // har frame reset karo
+
+
+            }
+
         }
 
-        move(buttonpressis, delta, player);
-        setup(player,delta);
+
+        if (isMoving == false) {
+            player.play("idle");
+            player.update(delta);  // animation update
+
+        }
+
+//        LOGI("%d", isMoving);
+        setup(player, delta);
 
     }
 
