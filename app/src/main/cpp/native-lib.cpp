@@ -202,7 +202,7 @@ void render(Sprite &player, float &delta) {
 
 
 
-    SDL_RenderPresent(ren);
+        SDL_RenderPresent(ren);
 
 }
 
