@@ -85,7 +85,7 @@ void connectController(int index) {
     controller = SDL_GameControllerOpen(index);
 
     if (controller) {
-        LOGI("Controller Connected: %s",
+        LOGI("Controller Connected : %s",
              SDL_GameControllerName(controller));
     }
 }
