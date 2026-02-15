@@ -6,6 +6,8 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <string>
+#include <SDL_ttf.h>
+
 
 #include "Sprite.h"
 
@@ -22,18 +24,25 @@ SDL_Rect dpad_left;
 SDL_Rect dpad_up;
 SDL_Rect dpad_down;
 
+TTF_Font* font;
 SDL_Rect dpad_a;
 SDL_Rect dpad_b;
 
 SDL_Rect dpad;
 SDL_Rect dpad_btn;
+SDL_Rect textRect;
+SDL_Rect dpad_src;
+SDL_Rect dpad_btn_src;
 
+SDL_Color yellow = {255,255,0,255};
 
 SDL_GameController *controller = NULL;
 
 SDL_Surface *bg;
 SDL_Texture *bg_texture;
 SDL_Texture *dpad_texture;
+SDL_Texture *textTexture;
+SDL_Surface* textSurface;
 
 int screen_width, screen_height;
 
@@ -105,10 +114,11 @@ void fps_counter(float delta) {
     frameCount++;
 
     if (SDL_GetTicks() - fpsTimer >= 1000) {
-        LOGI("FPS: %d \nDELTA : %f", frameCount, delta);
-
+//        LOGI("FPS: %d \nDELTA : %f", frameCount, delta);
+        fps = frameCount;
         frameCount = 0;
         fpsTimer = SDL_GetTicks();
+
     }
 
 }
@@ -122,30 +132,43 @@ float delta_fun() {
     return delta;
 }
 
-void setup(Sprite player, float delta) {
-
-    player.destRect.h = 250;
-    player.destRect.w = 250;
+void setup(Sprite &player) {
 
     int size = 80;
     int margin = size/3;
 
-    dpad_left  = {margin, screen_height - size*2 - margin, size, size};
+    player.destRect.h = 250;
+    player.destRect.w = 250;
 
+    dpad_left  = {margin, screen_height - size*2 - margin, size, size};
     dpad_right = {margin + size*2, screen_height - size*2 - margin, size, size};
     dpad_up    = {margin + size, screen_height - size*3 - margin, size, size};
     dpad_down  = {margin + size, screen_height - size - margin, size, size};
 
     dpad_a  = {screen_width-275, screen_height-200, size+20, size+10};
     dpad_b  = {screen_width-125, screen_height-200 , size+20, size+10};
-//    SDL_SetRenderDrawColor(ren, 100, 255, 2, 255);
-//    SDL_RenderClear(ren);
-//    canvas
 
-    //backgroundg
+
+    dpad  = {10, 405, 312, 312};//   dpad image hight and with and position crop image bysicly main postiion x and y for both dpad and src
+    dpad_src = {0, 300, 412,412 };// selection box for dpad
+
+    dpad_btn  = {screen_width-300, screen_height-350 , 312, 312};//   dpad image hight and with and position crop image bysicly main postiion x and y for both dpad and src
+    dpad_btn_src = {600, 250, 412,412 };// selection box for dpad
+
+    textRect = {50, 50,200, 50};
+
+
+
+}
+void render(Sprite &player, float &delta) {
+
+    SDL_RenderClear(ren);
     SDL_RenderCopy(ren, bg_texture, NULL, NULL);
-    //backgroundg
+    player.render(ren);   // draw on screen
+//    canvas
+//    SDL_SetRenderDrawColor(ren, 100, 255, 2, 255);
 
+//onscreen control
     SDL_SetRenderDrawBlendMode(ren, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(ren, 100, 100, 100, 0); //onscreen dpad color
 
@@ -157,62 +180,33 @@ void setup(Sprite player, float delta) {
     SDL_RenderFillRect(ren,&dpad_a );
     SDL_RenderFillRect(ren,&dpad_b );
 
-//    dpad skin
-
-    dpad  = {10, 405, 312, 312};//   dpad image hight and with and position crop image bysicly main postiion x and y for both dpad and src
     SDL_RenderFillRect(ren,&dpad ); // is for selection rectangel
-    SDL_Rect dpad_src = {0, 300, 412,412 };// selection box for dpad
-
-//    dpad skin
-
-//    dpad BUTTON skin
-
-    dpad_btn  = {screen_width-300, screen_height-350 , 312, 312};//   dpad image hight and with and position crop image bysicly main postiion x and y for both dpad and src
     SDL_RenderFillRect(ren,&dpad_btn ); // is for selection rectangel
-    SDL_Rect dpad_btn_src = {600, 250, 412,412 };// selection box for dpad
+//onscreen control
 
-    //    dpad  button skin
+
+//    fps text
+
+     textSurface = TTF_RenderText_Blended(font, ("fps :" + std::to_string(fps)).c_str()  , yellow);
+    textTexture = SDL_CreateTextureFromSurface(ren, textSurface);
+
+//    fps text
+
+
+    SDL_RenderCopy(ren, textTexture, NULL, &textRect);
+    SDL_DestroyTexture(textTexture);
+    SDL_FreeSurface(textSurface);
 
     SDL_RenderCopy(ren, dpad_texture, &dpad_src, &dpad);
     SDL_RenderCopy(ren, dpad_texture,&dpad_btn_src , &dpad_btn);
 
 
-    player.update(delta);  // animation update
-    player.render(ren);   // draw on screen
+
     SDL_RenderPresent(ren);
 
 }
 
-void movestick(int stick_type, int stick_value) {
-    if (stick_type == 0 and stick_value > 0) {
-//        RIGHT
-////        LOGI("RIGHT");
-
-
-    }
-
-    if (stick_type == 1 and stick_value > 0) {
-//        DOWN
-
-
-    }
-
-    if (stick_type == 1 and stick_value < 0) {
-//        UP MOVEMENT
-
-
-    }
-
-
-    if (stick_type == 0 and stick_value < 0) {
-        //Left movement
-
-
-    }
-
-}
-
-void move(int button_id, float delta, Sprite &player) {
+void move(int button_id, float &delta, Sprite &player) {
 
 //    if(delta>=7.008000){delta=7.008000;}
 
@@ -225,12 +219,12 @@ void move(int button_id, float delta, Sprite &player) {
         if (vsync == false) {
             vsync = true;
             LOGI("vsyn on");
-            ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+
         }
         if (vsync == true) {
             vsync = false;
             LOGI("vsyn off");
-            ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED);
+
         }
 
     }
@@ -282,7 +276,7 @@ void move(int button_id, float delta, Sprite &player) {
     }
 
 
-    player.update(delta);
+//    player.update(delta);
 }
 
 
@@ -313,12 +307,24 @@ extern "C" int SDL_main(int argc, char *argv[]) {
         SDL_Quit();
         return 1;
     }
+
+
     SDL_GetRendererOutputSize(ren, &screen_width, &screen_height);
 
     bool running = true;
     SDL_Event e;
 
     IMG_Init(IMG_INIT_PNG);
+     TTF_Init();
+     font = TTF_OpenFont("fonts/Noto_Sans/static/NotoSans-Bold.ttf", 50);
+
+    if(!font){
+        LOGI("font not found");
+        return 1;
+    }
+
+
+
 
     bg = SDL_LoadBMP("background/background2.bmp");
 
@@ -326,6 +332,8 @@ extern "C" int SDL_main(int argc, char *argv[]) {
     SDL_Texture *playerTexture = IMG_LoadTexture(ren, "player/sprites/new_lugi.png");
     dpad_texture = IMG_LoadTexture(ren, "on screen control/dpad1.png");
     bg_texture = SDL_CreateTextureFromSurface(ren, bg);
+
+
 
     // Create Sprite object
     Sprite player(playerTexture, 100, 100, 64, 64);
@@ -355,11 +363,15 @@ extern "C" int SDL_main(int argc, char *argv[]) {
     lastframetime = SDL_GetTicks();
     fpsTimer = SDL_GetTicks();
 
+
+    setup(player);
+
     //main game loop
     while (running) {
 
         float delta = delta_fun();
-//        fps_counter(delta);
+         fps_counter(delta);
+//        LOGI("fps : %d", fps_counter(delta));
 
 
         //loop for events
@@ -418,63 +430,56 @@ extern "C" int SDL_main(int argc, char *argv[]) {
                     onscreen_control="none";
             }
 
+            if(e.type== SDL_CONTROLLERBUTTONUP){
+                onscreen_control="none";
+            }
 
+            if (e.type == SDL_CONTROLLERDEVICEADDED){
 
-            if (e.type == SDL_CONTROLLERDEVICEADDED)
                 connectController(e.cdevice.which);
+            }
 
-            if (e.type == SDL_CONTROLLERDEVICEREMOVED)
+            if (e.type == SDL_CONTROLLERDEVICEREMOVED){
+
                 disconnectController(e.cdevice.which);
+                }
 
 
         }
 
 
         if (controller) {
-            isMoving = false;   // har frame reset karo
             if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_UP)) {
-                move(SDL_CONTROLLER_BUTTON_DPAD_UP, delta, player);
+                onscreen_control="up";
 //                    LOGI("%d",SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
-
-                isMoving = true;   // har frame reset karo
 
             }
             if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_DOWN)) {
-                move(SDL_CONTROLLER_BUTTON_DPAD_DOWN, delta, player);
-//                    LOGI("%d",SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
-                isMoving = true;   // har frame reset karo
-
+                onscreen_control="down";
             }
             if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_LEFT)) {
-                move(SDL_CONTROLLER_BUTTON_DPAD_LEFT, delta, player);
-//                    LOGI("%d",SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
-                isMoving = true;   // har frame reset karo
-
+                onscreen_control="left";
             }
             if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_RIGHT)) {
-                move(SDL_CONTROLLER_BUTTON_DPAD_RIGHT, delta, player);
-                isMoving = true;   // har frame reset karo
-
+                onscreen_control="right";
                 //                    LOGI("%d",SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
             }
             if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_A)) {
-                move(SDL_CONTROLLER_BUTTON_A, delta, player);
-                isMoving = true;   // har frame reset karo
-            player.update(delta);
-
+                onscreen_control="btn_a";
             }
             if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_B)) {
-                move(SDL_CONTROLLER_BUTTON_B, delta, player);
-                isMoving = true;   // har frame reset karo
-                player.update(delta);
-
-
-
+                onscreen_control="btn_b";
             }
+
         }
 
 
-        setup(player, delta);
+
+
+        render(player, delta);
+
+        player.update(delta);  // animation update
+
         if(onscreen_control == "none") {
                 isMoving= false;
         }
@@ -482,43 +487,36 @@ extern "C" int SDL_main(int argc, char *argv[]) {
 
             isMoving= true;
             move(SDL_CONTROLLER_BUTTON_DPAD_LEFT,delta,player);
-            player.update(delta);
             }
         if(onscreen_control == "right"){
 
             isMoving= true;
             move(SDL_CONTROLLER_BUTTON_DPAD_RIGHT,delta,player);
-            player.update(delta);
         }
         if(onscreen_control == "up"){
 
             isMoving= true;
             move(SDL_CONTROLLER_BUTTON_DPAD_UP,delta,player);
-            player.update(delta);
         }
         if(onscreen_control == "down"){
 
             isMoving= true;
             move(SDL_CONTROLLER_BUTTON_DPAD_DOWN,delta,player);
-            player.update(delta);
         }
         if(onscreen_control == "btn_a"){
 
             isMoving= true;
             move(SDL_CONTROLLER_BUTTON_A,delta,player);
-            player.update(delta);
         }
         if(onscreen_control == "btn_b"){
 
             isMoving= true;
             move(SDL_CONTROLLER_BUTTON_B,delta,player);
-            player.update(delta);
         }
 
 
         if (isMoving == false) {
             player.play("idle");
-            player.update(delta);  // animation update
 
         }
 
