@@ -210,20 +210,7 @@ void move(int button_id, float &delta, Sprite &player) {
         hello();
     }
 
-    if (button_id == 734) {
 
-        if (vsync == false) {
-            vsync = true;
-            LOGI("vsyn on");
-
-        }
-        if (vsync == true) {
-            vsync = false;
-            LOGI("vsyn off");
-
-        }
-
-    }
 
     if (button_id == 0) {
         //reset player
