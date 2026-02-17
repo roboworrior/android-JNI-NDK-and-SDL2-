@@ -184,7 +184,6 @@ void render(Sprite &player, float &delta) {
     SDL_RenderFillRect(ren,&dpad_btn ); // is for selection rectangel
 //onscreen control
 
-
 //    fps text
 
      textSurface = TTF_RenderText_Blended(font, ("fps :" + std::to_string(fps)).c_str()  , yellow);
@@ -192,15 +191,12 @@ void render(Sprite &player, float &delta) {
 
 //    fps text
 
-
     SDL_RenderCopy(ren, textTexture, NULL, &textRect);
     SDL_DestroyTexture(textTexture);
     SDL_FreeSurface(textSurface);
 
     SDL_RenderCopy(ren, dpad_texture, &dpad_src, &dpad);
     SDL_RenderCopy(ren, dpad_texture,&dpad_btn_src , &dpad_btn);
-
-
 
         SDL_RenderPresent(ren);
 
