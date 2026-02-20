@@ -27,22 +27,30 @@ SDL_Rect dpad_down;
 TTF_Font* font;
 SDL_Rect dpad_a;
 SDL_Rect dpad_b;
+SDL_Rect dpad_close_input;
+
+SDL_Rect dpad_close;
 
 SDL_Rect dpad;
+SDL_Rect wall_left;
+SDL_Rect wall_up;
+SDL_Rect wall_down;
+SDL_Rect wall_right;
 SDL_Rect dpad_btn;
 SDL_Rect textRect;
 SDL_Rect dpad_src;
 SDL_Rect dpad_btn_src;
+SDL_Rect dpad_close_src;
 
 SDL_Color yellow = {255,255,0,255};
 
 SDL_GameController *controller = NULL;
 
-SDL_Surface *bg;
 SDL_Texture *bg_texture;
 SDL_Texture *dpad_texture;
 SDL_Texture *textTexture;
 SDL_Surface* textSurface;
+SDL_Surface* bg;
 
 int screen_width, screen_height;
 
@@ -64,6 +72,22 @@ int red = 255;
 int green;
 int blue;
 
+
+
+void cleanup()
+{
+    SDL_DestroyTexture(bg_texture);
+    SDL_DestroyTexture(dpad_texture);
+    SDL_DestroyTexture(textTexture);
+
+    SDL_FreeSurface(textSurface);
+    SDL_FreeSurface(bg);
+
+
+    SDL_DestroyRenderer(ren);
+    SDL_DestroyWindow(win);
+    SDL_Quit();
+}
 
 int random_number() {
     static std::mt19937 gen(std::random_device{}());
@@ -123,6 +147,7 @@ void fps_counter(float delta) {
 
 }
 
+
 float delta_fun() {
 
     Uint32 now = SDL_GetTicks();
@@ -145,9 +170,11 @@ void setup(Sprite &player) {
     dpad_up    = {margin + size, screen_height - size*3 - margin, size, size};
     dpad_down  = {margin + size, screen_height - size - margin, size, size};
 
-    dpad_a  = {screen_width-275, screen_height-200, size+20, size+10};
-    dpad_b  = {screen_width-125, screen_height-200 , size+20, size+10};
 
+    wall_left  = {-100, 0, 10, screen_height};//   dpad image hight and with and position crop image bysicly main postiion x and y for both dpad and src
+    wall_right  = {screen_width+100, 0, 10, screen_height};//   dpad image hight and with and position crop image bysicly main postiion x and y for both dpad and src
+    wall_up  = {10, 0, screen_width, 10};//   dpad image hight and with and position crop image bysicly main postiion x and y for both dpad and src
+    wall_down  = {0, screen_height-10, screen_width, 10};//   dpad image hight and with and position crop image bysicly main postiion x and y for both dpad and src
 
     dpad  = {10, 405, 312, 312};//   dpad image hight and with and position crop image bysicly main postiion x and y for both dpad and src
     dpad_src = {0, 300, 412,412 };// selection box for dpad
@@ -155,18 +182,25 @@ void setup(Sprite &player) {
     dpad_btn  = {screen_width-300, screen_height-350 , 312, 312};//   dpad image hight and with and position crop image bysicly main postiion x and y for both dpad and src
     dpad_btn_src = {600, 250, 412,412 };// selection box for dpad
 
+    dpad_close  = {700, 0 , 112, 112}; //for box rect main element x,y
+    dpad_close_src = {400, 400, 212,212 };// for image
+
+    dpad_a  = {dpad_btn.x+25, dpad_btn.y+150, size+20, size+10};
+    dpad_b  = {dpad_btn.x+175, dpad_btn.y+150 , size+20, size+10};
+
+    dpad_close_input  = {dpad_close.x+15, dpad_close.y+10 , size, size};
+
     textRect = {50, 50,200, 50};
 
 
 
 }
+
 void render(Sprite &player, float &delta) {
 
     SDL_RenderClear(ren);
     SDL_RenderCopy(ren, bg_texture, NULL, NULL);
     player.render(ren);   // draw on screen
-//    canvas
-//    SDL_SetRenderDrawColor(ren, 100, 255, 2, 255);
 
 //onscreen control
     SDL_SetRenderDrawBlendMode(ren, SDL_BLENDMODE_BLEND);
@@ -179,6 +213,11 @@ void render(Sprite &player, float &delta) {
 
     SDL_RenderFillRect(ren,&dpad_a );
     SDL_RenderFillRect(ren,&dpad_b );
+    SDL_RenderFillRect(ren,&dpad_close_input );
+    SDL_RenderFillRect(ren,&wall_left );
+    SDL_RenderFillRect(ren,&wall_right );
+    SDL_RenderFillRect(ren,&wall_up );
+    SDL_RenderFillRect(ren,&wall_down );
 
     SDL_RenderFillRect(ren,&dpad ); // is for selection rectangel
     SDL_RenderFillRect(ren,&dpad_btn ); // is for selection rectangel
@@ -186,7 +225,7 @@ void render(Sprite &player, float &delta) {
 
 //    fps text
 
-     textSurface = TTF_RenderText_Blended(font, ("fps :" + std::to_string(fps)).c_str()  , yellow);
+    textSurface = TTF_RenderText_Blended(font, ("fps :" + std::to_string(fps)).c_str()  , yellow);
     textTexture = SDL_CreateTextureFromSurface(ren, textSurface);
 
 //    fps text
@@ -197,8 +236,13 @@ void render(Sprite &player, float &delta) {
 
     SDL_RenderCopy(ren, dpad_texture, &dpad_src, &dpad);
     SDL_RenderCopy(ren, dpad_texture,&dpad_btn_src , &dpad_btn);
+    SDL_RenderCopy(ren, dpad_texture,&dpad_close_src , &dpad_close);
+    SDL_RenderCopy(ren, NULL,NULL , &wall_left);
+    SDL_RenderCopy(ren, NULL,NULL , &wall_right);
+    SDL_RenderCopy(ren, NULL,NULL , &wall_up);
+    SDL_RenderCopy(ren, NULL,NULL , &wall_down);
 
-        SDL_RenderPresent(ren);
+    SDL_RenderPresent(ren);
 
 }
 
@@ -206,8 +250,43 @@ void move(int button_id, float &delta, Sprite &player) {
 
 //    if(delta>=7.008000){delta=7.008000;}
 
-    if (button_id == 3) {
-        hello();
+    //this wall
+
+    if(SDL_HasIntersection(&player.destRect, &wall_left))
+    {
+        LOGI("player enter in wall");
+        player.destRect.x+=10;
+        return;
+
+    }
+    if(SDL_HasIntersection(&player.destRect, &wall_right))
+    {
+        LOGI("player enter in wall");
+        player.destRect.x-=10;
+        return;
+
+    }
+    if(SDL_HasIntersection(&player.destRect, &wall_up))
+    {
+        LOGI("player enter in wall");
+        player.destRect.y+=10;
+        return;
+
+    }
+    if(SDL_HasIntersection(&player.destRect, &wall_down))
+    {
+        LOGI("player enter in wall");
+        player.destRect.y-=10;
+        return;
+
+    }
+
+    //this wall
+
+
+
+    if (button_id == 2 || button_id == 3) {
+        cleanup();
     }
 
 
@@ -222,6 +301,10 @@ void move(int button_id, float &delta, Sprite &player) {
         //reset player
         player.play("jump");
     }
+
+
+
+
     if (button_id == 14) {
 //            right movement
 
@@ -313,6 +396,7 @@ extern "C" int SDL_main(int argc, char *argv[]) {
 
     // Load texture
     SDL_Texture *playerTexture = IMG_LoadTexture(ren, "player/sprites/new_lugi.png");
+
     dpad_texture = IMG_LoadTexture(ren, "on screen control/dpad1.png");
     bg_texture = SDL_CreateTextureFromSurface(ren, bg);
 
@@ -400,6 +484,10 @@ extern "C" int SDL_main(int argc, char *argv[]) {
                     LOGI("it the onscreen control button b");
                     onscreen_control="btn_b";
 
+                }
+                if (SDL_PointInRect(&p, &dpad_close_input))
+                {
+                    cleanup();
 
                 }
 
@@ -453,10 +541,16 @@ extern "C" int SDL_main(int argc, char *argv[]) {
             if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_B)) {
                 onscreen_control="btn_b";
             }
+            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_Y)) {
+                onscreen_control="btn_y";
+            }
+            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_BACK)) {
+                    cleanup();
+//                LOGI("this is select");
+            }
+
 
         }
-
-
 
 
         render(player, delta);
@@ -496,6 +590,17 @@ extern "C" int SDL_main(int argc, char *argv[]) {
             isMoving= true;
             move(SDL_CONTROLLER_BUTTON_B,delta,player);
         }
+        if(onscreen_control == "btn_y"){
+
+            isMoving= true;
+            move(SDL_CONTROLLER_BUTTON_Y,delta,player);
+        }
+        if(onscreen_control == "btn_close"){
+
+            isMoving= true;
+            LOGI("this is close");
+//            move(SDL_CONTROLLER_BUTTON_Y,delta,player);
+        }
 
 
         if (isMoving == false) {
@@ -511,11 +616,6 @@ extern "C" int SDL_main(int argc, char *argv[]) {
     }
 
 
-    SDL_DestroyTexture(bg_texture);
-    SDL_DestroyTexture(dpad_texture);
-    SDL_DestroyTexture(playerTexture);
-    SDL_DestroyRenderer(ren);
-    SDL_DestroyWindow(win);
-    SDL_Quit();
+    cleanup();
     return 0;
 }
