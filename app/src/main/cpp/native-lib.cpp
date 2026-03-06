@@ -29,7 +29,10 @@ SDL_Rect dpad_a;
 SDL_Rect dpad_b;
 SDL_Rect dpad_close_input;
 
+bool coin_collected=false;
 SDL_Rect dpad_close;
+
+int score=0;
 
 SDL_Rect dpad;
 SDL_Rect wall_left;
@@ -40,7 +43,17 @@ SDL_Rect dpad_btn;
 SDL_Rect textRect;
 SDL_Rect dpad_src;
 SDL_Rect dpad_btn_src;
+SDL_Rect player_hitbox;
 SDL_Rect dpad_close_src;
+
+SDL_Rect pipe_src;
+SDL_Rect pipe_dstrect;
+
+SDL_Rect coin_src;
+SDL_Rect coin_dstrect;
+
+SDL_Rect brick_src;
+SDL_Rect brick_dstrect;
 
 SDL_Color yellow = {255,255,0,255};
 
@@ -50,6 +63,8 @@ SDL_Texture *bg_texture;
 SDL_Texture *dpad_texture;
 SDL_Texture *textTexture;
 SDL_Surface* textSurface;
+SDL_Texture *playerTexture;
+SDL_Texture *items;
 SDL_Surface* bg;
 
 int screen_width, screen_height;
@@ -60,6 +75,7 @@ bool vsync = false;
 bool player_flip = false;
 Uint32 lastframetime = 0;
 bool isMoving = false;   // har frame reset karo
+bool player_onair = false;   // har frame reset karo
 int fps = 0;
 
 std::string onscreen_control="none";
@@ -164,6 +180,15 @@ void setup(Sprite &player) {
 
     player.destRect.h = 250;
     player.destRect.w = 250;
+    SDL_GetRendererOutputSize(ren, &screen_width, &screen_height);
+
+
+
+
+//    LOGI("screen width : %d ",screen_width);
+//    LOGI("screen height : %d ",screen_height);
+
+
 
     dpad_left  = {margin, screen_height - size*2 - margin, size, size};
     dpad_right = {margin + size*2, screen_height - size*2 - margin, size, size};
@@ -179,18 +204,37 @@ void setup(Sprite &player) {
     dpad  = {10, 405, 312, 312};//   dpad image hight and with and position crop image bysicly main postiion x and y for both dpad and src
     dpad_src = {0, 300, 412,412 };// selection box for dpad
 
-    dpad_btn  = {screen_width-300, screen_height-350 , 312, 312};//   dpad image hight and with and position crop image bysicly main postiion x and y for both dpad and src
+    dpad_btn  = {screen_width-400, screen_height-350 , 312, 312};//   dpad image hight and with and position crop image bysicly main postiion x and y for both dpad and src
     dpad_btn_src = {600, 250, 412,412 };// selection box for dpad
 
     dpad_close  = {700, 0 , 112, 112}; //for box rect main element x,y
     dpad_close_src = {400, 400, 212,212 };// for image
 
-    dpad_a  = {dpad_btn.x+25, dpad_btn.y+150, size+20, size+10};
-    dpad_b  = {dpad_btn.x+175, dpad_btn.y+150 , size+20, size+10};
+    pipe_src = {930, 330, 212,180 };// for selection reactangle
+    pipe_dstrect = {-100, screen_height-220, 412,212 };// for image
+
+    brick_src = {0, 0, 812,280 };// for selection reactangle
+    brick_dstrect = {screen_width-700, 290, 712,180 };// for image
+
+
+    if(!coin_collected){
+
+    coin_dstrect = {screen_width-300, 120, 120,120 };// for image
+    coin_src = {130, 300, 170,170};// for selection reactangle
+    }
+
+
+    dpad_a  = {dpad_btn.x+25, dpad_btn.y+145, size+20, size+21};
+    dpad_b  = {dpad_btn.x+175, dpad_btn.y+145 , size+20, size+21};
 
     dpad_close_input  = {dpad_close.x+15, dpad_close.y+10 , size, size};
 
     textRect = {50, 50,200, 50};
+
+
+
+    player.destRect.x = screen_width/2;
+    player.destRect.y = wall_down.y-250;
 
 
 
@@ -202,26 +246,39 @@ void render(Sprite &player, float &delta) {
     SDL_RenderCopy(ren, bg_texture, NULL, NULL);
     player.render(ren);   // draw on screen
 
+    player_hitbox = {player.destRect.x+120, player.destRect.y, 50,50 };// for image
+
 //onscreen control
-    SDL_SetRenderDrawBlendMode(ren, SDL_BLENDMODE_BLEND);
-    SDL_SetRenderDrawColor(ren, 100, 100, 100, 0); //onscreen dpad color
+//    SDL_SetRenderDrawBlendMode(ren, SDL_BLENDMODE_BLEND);
+//    SDL_SetRenderDrawColor(ren, 100, 100, 100, 100); //onscreen dpad color
 
-    SDL_RenderFillRect(ren,&dpad_right );
-    SDL_RenderFillRect(ren,&dpad_left );
-    SDL_RenderFillRect(ren,&dpad_up );
-    SDL_RenderFillRect(ren,&dpad_down );
 
-    SDL_RenderFillRect(ren,&dpad_a );
-    SDL_RenderFillRect(ren,&dpad_b );
-    SDL_RenderFillRect(ren,&dpad_close_input );
-    SDL_RenderFillRect(ren,&wall_left );
-    SDL_RenderFillRect(ren,&wall_right );
-    SDL_RenderFillRect(ren,&wall_up );
-    SDL_RenderFillRect(ren,&wall_down );
-
-    SDL_RenderFillRect(ren,&dpad ); // is for selection rectangel
-    SDL_RenderFillRect(ren,&dpad_btn ); // is for selection rectangel
-//onscreen control
+//    SDL_RenderFillRect(ren,&player_hitbox);
+//    SDL_RenderFillRect(ren,&pipe_dstrect);
+//    SDL_RenderFillRect(ren,&player.destRect);
+//
+//    SDL_RenderFillRect(ren,&brick_dstrect );
+//    SDL_RenderFillRect(ren,&dpad_close_src );
+//    SDL_RenderFillRect(ren,&dpad_close);
+//
+//    SDL_RenderFillRect(ren,&pipe_dstrect );
+//    SDL_RenderFillRect(ren,&pipe_src );
+//    SDL_RenderFillRect(ren,&dpad_right );
+//    SDL_RenderFillRect(ren,&dpad_left );
+//    SDL_RenderFillRect(ren,&dpad_up );
+//    SDL_RenderFillRect(ren,&dpad_down );
+//
+//    SDL_RenderFillRect(ren,&dpad_a );
+//    SDL_RenderFillRect(ren,&dpad_b );
+//    SDL_RenderFillRect(ren,&dpad_close_input );
+//    SDL_RenderFillRect(ren,&wall_left );
+//    SDL_RenderFillRect(ren,&wall_right );
+//    SDL_RenderFillRect(ren,&wall_up );
+//    SDL_RenderFillRect(ren,&wall_down );
+//
+//    SDL_RenderFillRect(ren,&dpad ); // is for selection rectangel
+//    SDL_RenderFillRect(ren,&dpad_btn ); // is for selection rectangel
+////onscreen control
 
 //    fps text
 
@@ -234,9 +291,21 @@ void render(Sprite &player, float &delta) {
     SDL_DestroyTexture(textTexture);
     SDL_FreeSurface(textSurface);
 
+    SDL_RenderCopy(ren, items,&pipe_src , &pipe_dstrect);
+    SDL_RenderCopy(ren, items,&brick_src , &brick_dstrect);
+    if(!coin_collected){
+
+    SDL_RenderCopy(ren, items,&coin_src , &coin_dstrect);
+    }
+
+    if(!controller){
+
     SDL_RenderCopy(ren, dpad_texture, &dpad_src, &dpad);
     SDL_RenderCopy(ren, dpad_texture,&dpad_btn_src , &dpad_btn);
     SDL_RenderCopy(ren, dpad_texture,&dpad_close_src , &dpad_close);
+    }
+
+
     SDL_RenderCopy(ren, NULL,NULL , &wall_left);
     SDL_RenderCopy(ren, NULL,NULL , &wall_right);
     SDL_RenderCopy(ren, NULL,NULL , &wall_up);
@@ -250,56 +319,101 @@ void move(int button_id, float &delta, Sprite &player) {
 
 //    if(delta>=7.008000){delta=7.008000;}
 
+
+//    LOGI("button : %d", button_id);
+
     //this wall
 
+    if(!coin_collected && SDL_HasIntersection(&player.destRect, &coin_dstrect))
+    {
+        coin_collected= true;
+        score+=50;
+
+        LOGI("Player Score : %d",score);
+
+    }
     if(SDL_HasIntersection(&player.destRect, &wall_left))
     {
-        LOGI("player enter in wall");
+//        LOGI("player enter in wall");
         player.destRect.x+=10;
         return;
 
     }
     if(SDL_HasIntersection(&player.destRect, &wall_right))
     {
-        LOGI("player enter in wall");
+//        LOGI("player enter in wall");
         player.destRect.x-=10;
         return;
 
     }
     if(SDL_HasIntersection(&player.destRect, &wall_up))
     {
-        LOGI("player enter in wall");
+//        LOGI("player enter in wall");
         player.destRect.y+=10;
         return;
 
     }
-    if(SDL_HasIntersection(&player.destRect, &wall_down))
-    {
-        LOGI("player enter in wall");
-        player.destRect.y-=10;
-        return;
+
+
+
+    if(SDL_HasIntersection(&player_hitbox , &pipe_dstrect) ){
+        LOGI("this is pipe");
+
+
+
+        player.destRect.y=(brick_dstrect.y-250);
+        player.destRect.x=screen_width-100;
+
 
     }
+
+
+
+    if(SDL_HasIntersection(&player.destRect, &wall_down ))
+    {
+      player.destRect.y-=10;
+        return;
+    }
+
+//    if(SDL_HasIntersection(&player.destRect, &brick_dstrect ))
+//    {
+//
+//        player.destRect.y-=10;
+//        return;
+//    }
 
     //this wall
 
 
 
     if (button_id == 2 || button_id == 3) {
-        cleanup();
+//        cleanup();
     }
 
 
 
-    if (button_id == 0) {
+    if (button_id == 6) {
         //reset player
-        player.destRect.x = 250;
-        player.destRect.y = 200;
+        player.destRect.x = screen_width/2;
+        player.destRect.y = wall_down.y-250;
+
+        coin_collected= false;
 
     }
+
     if (button_id == 1) {
         //reset player
+
         player.play("jump");
+
+
+    }
+    if (button_id == 0) {
+
+        player_onair= true;
+        player.destRect.y -= 50;
+
+
     }
 
 
@@ -345,6 +459,47 @@ void move(int button_id, float &delta, Sprite &player) {
 //    player.update(delta);
 }
 
+void inair(Sprite &player,float  &delta){
+//    LOGI(" on air is : %d",player_onair);
+
+
+//if(player.destRect.y == brick_dstrect.y-player.destRect.h  ) {
+if(SDL_HasIntersection(&player.destRect, &brick_dstrect )  ) {
+
+//    LOGI("its on wall");
+
+    player_onair= false;
+}
+//if(player.destRect.y != brick_dstrect.y-player.destRect.h  ) {
+if(!SDL_HasIntersection(&player.destRect, &brick_dstrect )  ) {
+
+//    LOGI("its  not on wall");
+    player_onair= true;
+}
+
+
+
+
+
+    if(player.destRect.y == wall_down.y-player.destRect.h  ){
+
+        //this will turn off the on air when player reched to ground
+        player_onair= false;
+
+        }
+
+
+    if(player_onair){
+
+//        player_onair= false;
+        move(12,delta,player);
+    }
+
+
+
+}
+
+
 
 extern "C" int SDL_main(int argc, char *argv[]) {
 
@@ -375,7 +530,6 @@ extern "C" int SDL_main(int argc, char *argv[]) {
     }
 
 
-    SDL_GetRendererOutputSize(ren, &screen_width, &screen_height);
 
     bool running = true;
     SDL_Event e;
@@ -392,23 +546,15 @@ extern "C" int SDL_main(int argc, char *argv[]) {
 
 
 
-    bg = SDL_LoadBMP("background/background2.bmp");
-
     // Load texture
-    SDL_Texture *playerTexture = IMG_LoadTexture(ren, "player/sprites/new_lugi.png");
+    bg = SDL_LoadBMP("background/background2.bmp");
+    playerTexture = IMG_LoadTexture(ren, "player/sprites/new_lugi.png");
 
     dpad_texture = IMG_LoadTexture(ren, "on screen control/dpad1.png");
+    items = IMG_LoadTexture(ren, "items/Untitled.png");
+
     bg_texture = SDL_CreateTextureFromSurface(ren, bg);
 
-
-
-    // Create Sprite object
-    Sprite player(playerTexture, 100, 100, 64, 64);
-    // x=100, y=100, frame width=64, height=64
-
-    player.addAnimation("idle", 1, 4, 2.1f); // row 0, 4 frames, 0.1s per frame
-    player.addAnimation("jump", 2, 3,0.2f); // row 0, 4 frames, 0.1s per frame ( less speed value=== fash animetion play like 0.1f)
-    player.addAnimation("walk", 0, 3,0.2f); // row 0, 4 frames, 0.1s per frame ( less speed value=== fash animetion play like 0.1f)
 
     if (!playerTexture) {
         LOGI("Failed to load playerr texture : %s", SDL_GetError());
@@ -424,14 +570,22 @@ extern "C" int SDL_main(int argc, char *argv[]) {
 
     }
 
+    // Create Sprite object
+    Sprite player(playerTexture, 0, 0, 64, 64);
+
+    player.addAnimation("idle", 1, 4, 2.1f); // row 0, 4 frames, 0.1s per frame
+    player.addAnimation("jump", 2, 3,0.2f); // row 0, 4 frames, 0.1s per frame ( less speed value=== fash animetion play like 0.1f)
+    player.addAnimation("walk", 0, 3,0.2f); // row 0, 4 frames, 0.1s per frame ( less speed value=== fash animetion play like 0.1f)
+
 
 
     SDL_FreeSurface(bg);
+
     lastframetime = SDL_GetTicks();
     fpsTimer = SDL_GetTicks();
 
-
     setup(player);
+
 
     //main game loop
     while (running) {
@@ -439,6 +593,8 @@ extern "C" int SDL_main(int argc, char *argv[]) {
         float delta = delta_fun();
          fps_counter(delta);
 //        LOGI("fps : %d", fps_counter(delta));
+
+        inair(player,delta);
 
 
         //loop for events
@@ -548,6 +704,10 @@ extern "C" int SDL_main(int argc, char *argv[]) {
                     cleanup();
 //                LOGI("this is select");
             }
+            if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_START)) {
+                onscreen_control="btn_start";
+//                LOGI("this is select");
+            }
 
 
         }
@@ -595,6 +755,12 @@ extern "C" int SDL_main(int argc, char *argv[]) {
             isMoving= true;
             move(SDL_CONTROLLER_BUTTON_Y,delta,player);
         }
+        if(onscreen_control == "btn_start"){
+
+            isMoving= true;
+            move(SDL_CONTROLLER_BUTTON_START,delta,player);
+        }
+
         if(onscreen_control == "btn_close"){
 
             isMoving= true;
