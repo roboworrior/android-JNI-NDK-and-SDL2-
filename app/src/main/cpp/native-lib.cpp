@@ -8,86 +8,13 @@
 #include <string>
 #include <SDL_ttf.h>
 
-
+#include "globals.h"
 #include "Sprite.h"
+#include "controler.h"
 
-
-#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "SDL_DEMO", __VA_ARGS__))
-
-
-
-SDL_Renderer *ren = NULL;
-SDL_Window *win = NULL;
-
-SDL_Rect dpad_right;
-SDL_Rect dpad_left;
-SDL_Rect dpad_up;
-SDL_Rect dpad_down;
-
-TTF_Font* font;
-SDL_Rect dpad_a;
-SDL_Rect dpad_b;
-SDL_Rect dpad_close_input;
-
-bool coin_collected=false;
-SDL_Rect dpad_close;
-
-int score=0;
-
-SDL_Rect dpad;
-SDL_Rect wall_left;
-SDL_Rect wall_up;
-SDL_Rect wall_down;
-SDL_Rect wall_right;
-SDL_Rect dpad_btn;
-SDL_Rect textRect;
-SDL_Rect dpad_src;
-SDL_Rect dpad_btn_src;
-SDL_Rect player_hitbox;
-SDL_Rect dpad_close_src;
-
-SDL_Rect pipe_src;
-SDL_Rect pipe_dstrect;
-
-SDL_Rect coin_src;
-SDL_Rect coin_dstrect;
-
-SDL_Rect brick_src;
-SDL_Rect brick_dstrect;
-
-SDL_Color yellow = {255,255,0,255};
-
-SDL_GameController *controller = NULL;
-
-SDL_Texture *bg_texture;
-SDL_Texture *dpad_texture;
-SDL_Texture *textTexture;
-SDL_Surface* textSurface;
-SDL_Texture *playerTexture;
-SDL_Texture *items;
-SDL_Surface* bg;
-
-int screen_width, screen_height;
-
-
-bool button_pressed = false;
-bool vsync = false;
-bool player_flip = false;
-Uint32 lastframetime = 0;
-bool isMoving = false;   // har frame reset karo
-bool player_onair = false;   // har frame reset karo
-int fps = 0;
-
-std::string onscreen_control="none";
-int frameCount = 0;
-Uint32 fpsTimer = 0;
-float speed = 450.0f;
-
-
-int red = 255;
-int green;
-int blue;
-
+#include "setup.h"
+#include "render.h"
+#include "move.h"
 
 
 void cleanup()
@@ -95,6 +22,8 @@ void cleanup()
     SDL_DestroyTexture(bg_texture);
     SDL_DestroyTexture(dpad_texture);
     SDL_DestroyTexture(textTexture);
+
+
 
     SDL_FreeSurface(textSurface);
     SDL_FreeSurface(bg);
@@ -117,37 +46,6 @@ void hello() {
     blue = random_number();
 }
 
-//controler login
-void connectController(int index) {
-
-    if (!SDL_IsGameController(index)) return;
-
-    controller = SDL_GameControllerOpen(index);
-
-    if (controller) {
-        LOGI("Controller Connected : %s",
-             SDL_GameControllerName(controller));
-    }
-}
-
-
-void disconnectController(SDL_JoystickID id) {
-
-    if (!controller) return;
-
-    SDL_Joystick *joy =
-            SDL_GameControllerGetJoystick(controller);
-
-    if (SDL_JoystickInstanceID(joy) == id) {
-
-        SDL_GameControllerClose(controller);
-        controller = NULL;
-
-        LOGI("Controller Removed");
-    }
-}
-
-//controler login
 
 
 void fps_counter(float delta) {
@@ -173,313 +71,26 @@ float delta_fun() {
     return delta;
 }
 
-void setup(Sprite &player) {
 
-    int size = 80;
-    int margin = size/3;
 
-    player.destRect.h = 250;
-    player.destRect.w = 250;
-    SDL_GetRendererOutputSize(ren, &screen_width, &screen_height);
 
 
-
-
-//    LOGI("screen width : %d ",screen_width);
-//    LOGI("screen height : %d ",screen_height);
-
-
-
-    dpad_left  = {margin, screen_height - size*2 - margin, size, size};
-    dpad_right = {margin + size*2, screen_height - size*2 - margin, size, size};
-    dpad_up    = {margin + size, screen_height - size*3 - margin, size, size};
-    dpad_down  = {margin + size, screen_height - size - margin, size, size};
-
-
-    wall_left  = {-100, 0, 10, screen_height};//   dpad image hight and with and position crop image bysicly main postiion x and y for both dpad and src
-    wall_right  = {screen_width+100, 0, 10, screen_height};//   dpad image hight and with and position crop image bysicly main postiion x and y for both dpad and src
-    wall_up  = {10, 0, screen_width, 10};//   dpad image hight and with and position crop image bysicly main postiion x and y for both dpad and src
-    wall_down  = {0, screen_height-10, screen_width, 10};//   dpad image hight and with and position crop image bysicly main postiion x and y for both dpad and src
-
-    dpad  = {10, 405, 312, 312};//   dpad image hight and with and position crop image bysicly main postiion x and y for both dpad and src
-    dpad_src = {0, 300, 412,412 };// selection box for dpad
-
-    dpad_btn  = {screen_width-400, screen_height-350 , 312, 312};//   dpad image hight and with and position crop image bysicly main postiion x and y for both dpad and src
-    dpad_btn_src = {600, 250, 412,412 };// selection box for dpad
-
-    dpad_close  = {700, 0 , 112, 112}; //for box rect main element x,y
-    dpad_close_src = {400, 400, 212,212 };// for image
-
-    pipe_src = {930, 330, 212,180 };// for selection reactangle
-    pipe_dstrect = {-100, screen_height-220, 412,212 };// for image
-
-    brick_src = {0, 0, 812,280 };// for selection reactangle
-    brick_dstrect = {screen_width-700, 290, 712,180 };// for image
-
-
-    if(!coin_collected){
-
-    coin_dstrect = {screen_width-300, 120, 120,120 };// for image
-    coin_src = {130, 300, 170,170};// for selection reactangle
-    }
-
-
-    dpad_a  = {dpad_btn.x+25, dpad_btn.y+145, size+20, size+21};
-    dpad_b  = {dpad_btn.x+175, dpad_btn.y+145 , size+20, size+21};
-
-    dpad_close_input  = {dpad_close.x+15, dpad_close.y+10 , size, size};
-
-    textRect = {50, 50,200, 50};
-
-
-
-    player.destRect.x = screen_width/2;
-    player.destRect.y = wall_down.y-250;
-
-
-
-}
-
-void render(Sprite &player, float &delta) {
-
-    SDL_RenderClear(ren);
-    SDL_RenderCopy(ren, bg_texture, NULL, NULL);
-    player.render(ren);   // draw on screen
-
-    player_hitbox = {player.destRect.x+120, player.destRect.y, 50,50 };// for image
-
-//onscreen control
-//    SDL_SetRenderDrawBlendMode(ren, SDL_BLENDMODE_BLEND);
-//    SDL_SetRenderDrawColor(ren, 100, 100, 100, 100); //onscreen dpad color
-
-
-//    SDL_RenderFillRect(ren,&player_hitbox);
-//    SDL_RenderFillRect(ren,&pipe_dstrect);
-//    SDL_RenderFillRect(ren,&player.destRect);
-//
-//    SDL_RenderFillRect(ren,&brick_dstrect );
-//    SDL_RenderFillRect(ren,&dpad_close_src );
-//    SDL_RenderFillRect(ren,&dpad_close);
-//
-//    SDL_RenderFillRect(ren,&pipe_dstrect );
-//    SDL_RenderFillRect(ren,&pipe_src );
-//    SDL_RenderFillRect(ren,&dpad_right );
-//    SDL_RenderFillRect(ren,&dpad_left );
-//    SDL_RenderFillRect(ren,&dpad_up );
-//    SDL_RenderFillRect(ren,&dpad_down );
-//
-//    SDL_RenderFillRect(ren,&dpad_a );
-//    SDL_RenderFillRect(ren,&dpad_b );
-//    SDL_RenderFillRect(ren,&dpad_close_input );
-//    SDL_RenderFillRect(ren,&wall_left );
-//    SDL_RenderFillRect(ren,&wall_right );
-//    SDL_RenderFillRect(ren,&wall_up );
-//    SDL_RenderFillRect(ren,&wall_down );
-//
-//    SDL_RenderFillRect(ren,&dpad ); // is for selection rectangel
-//    SDL_RenderFillRect(ren,&dpad_btn ); // is for selection rectangel
-////onscreen control
-
-//    fps text
-
-    textSurface = TTF_RenderText_Blended(font, ("fps :" + std::to_string(fps)).c_str()  , yellow);
-    textTexture = SDL_CreateTextureFromSurface(ren, textSurface);
-
-//    fps text
-
-    SDL_RenderCopy(ren, textTexture, NULL, &textRect);
-    SDL_DestroyTexture(textTexture);
-    SDL_FreeSurface(textSurface);
-
-    SDL_RenderCopy(ren, items,&pipe_src , &pipe_dstrect);
-    SDL_RenderCopy(ren, items,&brick_src , &brick_dstrect);
-    if(!coin_collected){
-
-    SDL_RenderCopy(ren, items,&coin_src , &coin_dstrect);
-    }
-
-    if(!controller){
-
-    SDL_RenderCopy(ren, dpad_texture, &dpad_src, &dpad);
-    SDL_RenderCopy(ren, dpad_texture,&dpad_btn_src , &dpad_btn);
-    SDL_RenderCopy(ren, dpad_texture,&dpad_close_src , &dpad_close);
-    }
-
-
-    SDL_RenderCopy(ren, NULL,NULL , &wall_left);
-    SDL_RenderCopy(ren, NULL,NULL , &wall_right);
-    SDL_RenderCopy(ren, NULL,NULL , &wall_up);
-    SDL_RenderCopy(ren, NULL,NULL , &wall_down);
-
-    SDL_RenderPresent(ren);
-
-}
-
-void move(int button_id, float &delta, Sprite &player) {
-
-//    if(delta>=7.008000){delta=7.008000;}
-
-
-//    LOGI("button : %d", button_id);
-
-    //this wall
-
-    if(!coin_collected && SDL_HasIntersection(&player.destRect, &coin_dstrect))
-    {
-        coin_collected= true;
-        score+=50;
-
-        LOGI("Player Score : %d",score);
-
-    }
-    if(SDL_HasIntersection(&player.destRect, &wall_left))
-    {
-//        LOGI("player enter in wall");
-        player.destRect.x+=10;
-        return;
-
-    }
-    if(SDL_HasIntersection(&player.destRect, &wall_right))
-    {
-//        LOGI("player enter in wall");
-        player.destRect.x-=10;
-        return;
-
-    }
-    if(SDL_HasIntersection(&player.destRect, &wall_up))
-    {
-//        LOGI("player enter in wall");
-        player.destRect.y+=10;
-        return;
-
-    }
-
-
-
-    if(SDL_HasIntersection(&player_hitbox , &pipe_dstrect) ){
-        LOGI("this is pipe");
-
-
-
-        player.destRect.y=(brick_dstrect.y-250);
-        player.destRect.x=screen_width-100;
-
-
-    }
-
-
-
-    if(SDL_HasIntersection(&player.destRect, &wall_down ))
-    {
-      player.destRect.y-=10;
-        return;
-    }
-
-//    if(SDL_HasIntersection(&player.destRect, &brick_dstrect ))
-//    {
-//
-//        player.destRect.y-=10;
-//        return;
-//    }
-
-    //this wall
-
-
-
-    if (button_id == 2 || button_id == 3) {
-//        cleanup();
-    }
-
-
-
-    if (button_id == 6) {
-        //reset player
-        player.destRect.x = screen_width/2;
-        player.destRect.y = wall_down.y-250;
-
-        coin_collected= false;
-
-    }
-
-    if (button_id == 1) {
-        //reset player
-
-        player.play("jump");
-
-
-    }
-    if (button_id == 0) {
-
-        player_onair= true;
-        player.destRect.y -= 50;
-
-
-    }
-
-
-
-
-    if (button_id == 14) {
-//            right movement
-
-        if (player_flip == true) {
-            player_flip = false;
-//            LOGI("player is goving  right so we are flipping to right");
-            player.setFlip(SDL_FLIP_NONE);
-        }
-        player.play("walk");
-        player.destRect.x += speed * delta;
-    }
-
-    if (button_id == 13) {
-//            left movement
-//        LOGI("this is %d and button is %d",button_pressed,button_id);
-        if (player_flip == false) {
-
-            player_flip = true;
-            player.setFlip(SDL_FLIP_HORIZONTAL);
-//            LOGI("player is goving  left so we are flipping to left");
-        }
-
-        player.play("walk");
-        player.destRect.x -= speed * delta;
-    }
-    if (button_id == 11) {
-//            up movement
-//        LOGI("this is %d and button is %d",button_pressed,button_id);
-        player.destRect.y -= speed * delta;
-    }
-    if (button_id == 12) {
-//            down movement
-//        LOGI("this is %d and button is %d",button_pressed,button_id);
-        player.destRect.y += speed * delta;
-    }
-
-
-//    player.update(delta);
-}
 
 void inair(Sprite &player,float  &delta){
 //    LOGI(" on air is : %d",player_onair);
 
+player_onair= true;
+for(int i=0;i<total_bricks;i++) {
 
-//if(player.destRect.y == brick_dstrect.y-player.destRect.h  ) {
-if(SDL_HasIntersection(&player.destRect, &brick_dstrect )  ) {
 
-//    LOGI("its on wall");
+    if (SDL_HasIntersection(&player_hitbox, &brick_dstrect[i])) {
 
-    player_onair= false;
+        player_onair = false;
+
+        break;
+    }
+
 }
-//if(player.destRect.y != brick_dstrect.y-player.destRect.h  ) {
-if(!SDL_HasIntersection(&player.destRect, &brick_dstrect )  ) {
-
-//    LOGI("its  not on wall");
-    player_onair= true;
-}
-
-
-
-
 
     if(player.destRect.y == wall_down.y-player.destRect.h  ){
 
@@ -487,7 +98,6 @@ if(!SDL_HasIntersection(&player.destRect, &brick_dstrect )  ) {
         player_onair= false;
 
         }
-
 
     if(player_onair){
 
@@ -549,14 +159,15 @@ extern "C" int SDL_main(int argc, char *argv[]) {
     // Load texture
     bg = SDL_LoadBMP("background/background2.bmp");
     playerTexture = IMG_LoadTexture(ren, "player/sprites/new_lugi.png");
+    enemie1Texture = IMG_LoadTexture(ren, "ememies/green duck.png");
 
     dpad_texture = IMG_LoadTexture(ren, "on screen control/dpad1.png");
-    items = IMG_LoadTexture(ren, "items/Untitled.png");
+    itemTexture = IMG_LoadTexture(ren, "items/Untitled.png");
 
     bg_texture = SDL_CreateTextureFromSurface(ren, bg);
 
 
-    if (!playerTexture) {
+    if (!playerTexture || !enemie1Texture) {
         LOGI("Failed to load playerr texture : %s", SDL_GetError());
         return 1;
     }
@@ -573,18 +184,20 @@ extern "C" int SDL_main(int argc, char *argv[]) {
     // Create Sprite object
     Sprite player(playerTexture, 0, 0, 64, 64);
 
+    player.addAnimation("walk", 0, 3,0.2f); // row 0, 4 frames, 0.1s per frame ( less speed value=== fash animetion play like 0.1f)
     player.addAnimation("idle", 1, 4, 2.1f); // row 0, 4 frames, 0.1s per frame
     player.addAnimation("jump", 2, 3,0.2f); // row 0, 4 frames, 0.1s per frame ( less speed value=== fash animetion play like 0.1f)
-    player.addAnimation("walk", 0, 3,0.2f); // row 0, 4 frames, 0.1s per frame ( less speed value=== fash animetion play like 0.1f)
 
 
+    Sprite enemie1(enemie1Texture, 0, 0, 64, 64);
+    enemie1.addAnimation("walk", 0, 3,0.2f); // row 0, 4 frames, 0.1s per frame ( less speed value=== fash animetion play like 0.1f)
 
     SDL_FreeSurface(bg);
 
     lastframetime = SDL_GetTicks();
     fpsTimer = SDL_GetTicks();
 
-    setup(player);
+    setup(player,enemie1);
 
 
     //main game loop
@@ -713,9 +326,12 @@ extern "C" int SDL_main(int argc, char *argv[]) {
         }
 
 
-        render(player, delta);
-
+        render(player,enemie1,delta);
         player.update(delta);  // animation update
+        enemie1.update(delta);  // animation update
+
+
+//        enemie1.update(delta);  // animation update
 
         if(onscreen_control == "none") {
                 isMoving= false;
@@ -724,10 +340,12 @@ extern "C" int SDL_main(int argc, char *argv[]) {
 
             isMoving= true;
             move(SDL_CONTROLLER_BUTTON_DPAD_LEFT,delta,player);
+//            player.play("walk");
             }
         if(onscreen_control == "right"){
 
             isMoving= true;
+//            player.play("walk");
             move(SDL_CONTROLLER_BUTTON_DPAD_RIGHT,delta,player);
         }
         if(onscreen_control == "up"){
@@ -774,6 +392,13 @@ extern "C" int SDL_main(int argc, char *argv[]) {
 
         }
 
+//
+//        if(enemie1.destRect.x <= brick_dstrect[1].w){
+//
+//        }
+        enem_move(enemie1,brick_dstrect[1],delta,player);
+
+//        LOGI(" is moving is %d",isMoving);
 
 
 //        LOGI("%d", isMoving);

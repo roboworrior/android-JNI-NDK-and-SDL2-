@@ -48,7 +48,7 @@ void setup(Sprite &player , Sprite &enemie1 ) {
 
     brick_src = {0, 0, 812,280 };// for selection reactangle
     brick_dstrect[0] = {screen_width-700, 190, 712,150 };// for image
-    brick_dstrect[1] = {-100, 190, 712,150 };// for image
+    brick_dstrect[1] = {-20, 190, 712,150 };// for image
     brick_dstrect[2] = {(screen_width/2)-250, brick_dstrect[0].y+250, 712,150 };// for image
 
     coin_src = {130, 300, 170,170};// for selection reactangle
@@ -107,6 +107,8 @@ void setup(Sprite &player , Sprite &enemie1 ) {
 
     enemie1.destRect.x = 300;
     enemie1.destRect.y = 50;
+
+    LOGI("hello this is setup");
 
 
 

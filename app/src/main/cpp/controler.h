@@ -1,8 +1,36 @@
-//
-// Created by CYBORG on 14/03/2026.
-//
+#include <SDL.h>
+#include "globals.h"
 
-#ifndef SDL_C_CONTROLER_H
-#define SDL_C_CONTROLER_H
+//controler login
+void connectController(int index) {
 
-#endif //SDL_C_CONTROLER_H
+    if (!SDL_IsGameController(index)) return;
+
+    controller = SDL_GameControllerOpen(index);
+
+    if (controller) {
+        LOGI("Controller Connected : %s",
+             SDL_GameControllerName(controller));
+    }
+}
+
+
+void disconnectController(SDL_JoystickID id) {
+
+    if (!controller) return;
+
+    SDL_Joystick *joy =
+            SDL_GameControllerGetJoystick(controller);
+
+    if (SDL_JoystickInstanceID(joy) == id) {
+
+        SDL_GameControllerClose(controller);
+        controller = NULL;
+
+        LOGI("Controller Removed");
+    }
+}
+
+//controler login
+
+

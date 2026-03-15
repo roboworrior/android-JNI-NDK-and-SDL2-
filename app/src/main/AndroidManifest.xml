@@ -13,6 +13,10 @@
         android:theme="@style/Theme.SdlC">
 
         <activity
+
+
+            android:screenOrientation="landscape"
+
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>

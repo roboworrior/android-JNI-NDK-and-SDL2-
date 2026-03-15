@@ -24,6 +24,8 @@ add_library(
         SHARED
         native-lib.cpp
         Sprite.cpp
+        globals.cpp
+
 )
 
 # Find log library for Android
