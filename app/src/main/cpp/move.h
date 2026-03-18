@@ -12,13 +12,16 @@ void move(int button_id, float &delta, Sprite &player) {
             item.item_collected= true;
 
             if(item.type == "coin"){
-                score+=50;
+                p1_stats.score+=50;
+                p1_stats.coins+=1;
+
             }
             if(item.type == "powerup"){
-                speed+=100;
+              p1_stats.powerup_status= true;
+              score+=100;
             }
 
-            LOGI("Player Score : %d",score);
+            LOGI("Player Score : %d",p1_stats.score);
 
         }
 
@@ -85,7 +88,13 @@ void move(int button_id, float &delta, Sprite &player) {
         player.destRect.x = screen_width/2;
         player.destRect.y = wall_down.y-250;
         speed= 450.0f;
+        enemie_dead= false;
+        p1_stats.coins=0;
+        p1_stats.powerup_status= false;
+        p1_stats.powerup_fired= false;
 
+        powerup1_dstrect.x=-100;
+        powerup1_dstrect.y=-100;
         for(auto &item :items){
             item.item_collected= false;
 
@@ -99,13 +108,11 @@ void move(int button_id, float &delta, Sprite &player) {
         player.play("jump");
 
     }
-    if (button_id == 0) {
-
-        player_onair= true;
-        player.destRect.y -= 50;
-
-
-    }
+//    if (button_id == 0) {
+//
+//        powerup1_dstrect.x-=speed *delta;
+//
+//    }
 
 
 
@@ -116,6 +123,7 @@ void move(int button_id, float &delta, Sprite &player) {
             player_flip = false;
 //            LOGI("player is goving  right so we are flipping to right");
             player.setFlip(SDL_FLIP_NONE);
+            p1_stats.player_flip= false;
         }
         player.play("walk");
         player.destRect.x += speed * delta;
@@ -128,6 +136,7 @@ void move(int button_id, float &delta, Sprite &player) {
 
             player_flip = true;
             player.setFlip(SDL_FLIP_HORIZONTAL);
+            p1_stats.player_flip= true;
 //            LOGI("player is goving  left so we are flipping to left");
         }
 
@@ -137,7 +146,7 @@ void move(int button_id, float &delta, Sprite &player) {
     if (button_id == 11) {
 //            up movement
 //        LOGI("this is %d and button is %d",button_pressed,button_id);
-        player.destRect.y -= speed * delta;
+//        player.destRect.y -= speed * delta;
     }
     if (button_id == 12) {
 //            down movement
@@ -152,9 +161,11 @@ void move(int button_id, float &delta, Sprite &player) {
 void enem_move(Sprite &enemie1, SDL_Rect &place, float &delta,Sprite &player){
     enemie1.play("walk");
 
-    if(SDL_HasIntersection(&player_hitbox , &enemie1.destRect) ) {
+    if(SDL_HasIntersection(&player_hitbox , &enemie1.destRect) && !enemie_dead ) {
         LOGI("dont tuch me lugi ");
+
         move(6,delta,player);
+
     }
 
 //    LOGI("place.x : %d  and player.x : %d enimie_ai is :%d",place.x,enemie1.destRect.x,enemie_ai);

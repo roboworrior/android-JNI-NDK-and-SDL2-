@@ -17,10 +17,17 @@ void setup(Sprite &player , Sprite &enemie1 ) {
     enemie1.destRect.h = 150;
     enemie1.destRect.w = 150;
 
+
+
+
     SDL_GetRendererOutputSize(ren, &screen_width, &screen_height);
 
-    dpad_left  = {margin, screen_height - size*2 - margin, size, size};
-    dpad_right = {margin + size*2, screen_height - size*2 - margin, size, size};
+    dpad  = {10, 405, 312, 312};//   dpad image hight and with and position crop image bysicly main postiion x and y for both dpad and src
+    dpad_src = {0, 300, 412,412 };// selection box for dpad
+
+    dpad_left  = {margin, dpad.y+130, size, size};
+    dpad_right = {margin + size*2, dpad.y+150, size, size};
+
     dpad_up    = {margin + size, screen_height - size*3 - margin, size, size};
     dpad_down  = {margin + size, screen_height - size - margin, size, size};
 
@@ -30,8 +37,6 @@ void setup(Sprite &player , Sprite &enemie1 ) {
     wall_up  = {10, 0, screen_width, 10};//   dpad image hight and with and position crop image bysicly main postiion x and y for both dpad and src
     wall_down  = {0, screen_height-10, screen_width, 10};//   dpad image hight and with and position crop image bysicly main postiion x and y for both dpad and src
 
-    dpad  = {10, 405, 312, 312};//   dpad image hight and with and position crop image bysicly main postiion x and y for both dpad and src
-    dpad_src = {0, 300, 412,412 };// selection box for dpad
 
     dpad_btn  = {screen_width-400, screen_height-350 , 312, 312};//   dpad image hight and with and position crop image bysicly main postiion x and y for both dpad and src
     dpad_btn_src = {600, 250, 412,412 };// selection box for dpad
@@ -42,7 +47,7 @@ void setup(Sprite &player , Sprite &enemie1 ) {
     pipe_src = {930, 330, 212,180 };// for selection reactangle
     pipe_dstrect = {-100, screen_height-220, 412,212 };// for image
 
-    powerup1_dstrect = {400, screen_height-220, 130,130 };// for image
+    powerup1_dstrect = {-100, -100, 130,130 };// for image
     powerup1_src = {430, 320, 120,120 };// for selection reactangle
 
 
@@ -50,6 +55,12 @@ void setup(Sprite &player , Sprite &enemie1 ) {
     brick_dstrect[0] = {screen_width-700, 190, 712,150 };// for image
     brick_dstrect[1] = {-20, 190, 712,150 };// for image
     brick_dstrect[2] = {(screen_width/2)-250, brick_dstrect[0].y+250, 712,150 };// for image
+
+    brick_dstrect_colustion[0] = {brick_dstrect[0].x, brick_dstrect[0].y,brick_dstrect[0].w ,5 };// for image
+    brick_dstrect_colustion[1] = {brick_dstrect[1].x, brick_dstrect[1].y,brick_dstrect[1].w ,5 };// for image
+    brick_dstrect_colustion[2] = {brick_dstrect[2].x, brick_dstrect[2].y,brick_dstrect[2].w ,5 };// for image
+
+
 
     coin_src = {130, 300, 170,170};// for selection reactangle
 
@@ -100,8 +111,14 @@ void setup(Sprite &player , Sprite &enemie1 ) {
 
     textRect = {50, 50,200, 50};
 
-
-
+    p1_stats.lifes=3;
+    p1_stats.coins=0;
+    p1_stats.dead_status= false;
+    p1_stats.powerup_status= false;
+    p1_stats.powerup_fired= false;
+    p1_stats.score=0;
+    p1_stats.player_flip= false;
+    p1_stats.player_win= false;
     player.destRect.x = screen_width/2;
     player.destRect.y = wall_down.y-250;
 
@@ -110,6 +127,7 @@ void setup(Sprite &player , Sprite &enemie1 ) {
 
     LOGI("hello this is setup");
 
+//    winrect={0,50,100,100};
 
 
 }

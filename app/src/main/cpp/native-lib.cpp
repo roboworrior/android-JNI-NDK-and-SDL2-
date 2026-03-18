@@ -17,6 +17,7 @@
 #include "move.h"
 
 
+
 void cleanup()
 {
     SDL_DestroyTexture(bg_texture);
@@ -41,9 +42,7 @@ int random_number() {
 }
 
 void hello() {
-    red = random_number();
-    green = random_number();
-    blue = random_number();
+
 }
 
 
@@ -83,7 +82,7 @@ player_onair= true;
 for(int i=0;i<total_bricks;i++) {
 
 
-    if (SDL_HasIntersection(&player_hitbox, &brick_dstrect[i])) {
+    if (SDL_HasIntersection(&player_hitbox, &brick_dstrect_colustion[i])) {
 
         player_onair = false;
 
@@ -146,9 +145,11 @@ extern "C" int SDL_main(int argc, char *argv[]) {
 
     IMG_Init(IMG_INIT_PNG);
      TTF_Init();
-     font = TTF_OpenFont("fonts/Noto_Sans/static/NotoSans-Bold.ttf", 50);
+     font_small = TTF_OpenFont("fonts/Noto_Sans/static/NotoSans-Bold.ttf", 50);
+     font_big = TTF_OpenFont("fonts/Noto_Sans/static/NotoSans-Bold.ttf", 70);
 
-    if(!font){
+
+    if(!font_small||!font_big){
         LOGI("font not found");
         return 1;
     }
@@ -328,7 +329,11 @@ extern "C" int SDL_main(int argc, char *argv[]) {
 
         render(player,enemie1,delta);
         player.update(delta);  // animation update
-        enemie1.update(delta);  // animation update
+
+        if(!enemie_dead){
+//            enemie_dead= true;
+            enemie1.update(delta);  // animation update
+        }
 
 
 //        enemie1.update(delta);  // animation update
@@ -392,17 +397,33 @@ extern "C" int SDL_main(int argc, char *argv[]) {
 
         }
 
-//
-//        if(enemie1.destRect.x <= brick_dstrect[1].w){
-//
-//        }
+
         enem_move(enemie1,brick_dstrect[1],delta,player);
 
-//        LOGI(" is moving is %d",isMoving);
+        if( p1_stats.powerup_fired== true){
+//        p1_stats.powerup_status= false;
+
+            powerup1_dstrect.x-=speed*delta;
+
+        }
+        LOGI("this is powerup status :%d",p1_stats.powerup_status);
 
 
-//        LOGI("%d", isMoving);
+        if(SDL_HasIntersection(&powerup1_dstrect,&enemie1.destRect)){
+            enemie_dead= true;
 
+            LOGI("this sis deuck dead");
+        }
+//            LOGI("totla conis :%d",p1_stats.coins);
+
+
+
+        if(p1_stats.coins==items.size()-1 && enemie_dead== true ){
+
+            SDL_Delay(1000);
+            p1_stats.player_win= true;
+
+        }
 
     }
 
