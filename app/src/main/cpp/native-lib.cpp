@@ -406,10 +406,9 @@ extern "C" int SDL_main(int argc, char *argv[]) {
             powerup1_dstrect.x-=speed*delta;
 
         }
-        LOGI("this is powerup status :%d",p1_stats.powerup_status);
 
 
-        if(SDL_HasIntersection(&powerup1_dstrect,&enemie1.destRect)){
+        if(SDL_HasIntersection(&powerup1_dstrect,&enemie1.destRect) && p1_stats.powerup_fired== true){
             enemie_dead= true;
 
             LOGI("this sis deuck dead");

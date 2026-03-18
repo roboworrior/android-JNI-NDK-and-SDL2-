@@ -108,11 +108,16 @@ void move(int button_id, float &delta, Sprite &player) {
         player.play("jump");
 
     }
-//    if (button_id == 0) {
-//
-//        powerup1_dstrect.x-=speed *delta;
-//
-//    }
+    if (button_id == 0 && p1_stats.powerup_status) {
+
+        if(!p1_stats.powerup_fired){
+
+            powerup1_dstrect.y = player_hitbox.y - player.destRect.h;
+            powerup1_dstrect.x = player_hitbox.x;
+        }
+        p1_stats.powerup_fired= true;
+
+    }
 
 
 

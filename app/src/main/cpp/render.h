@@ -61,7 +61,7 @@ void render(Sprite &player, Sprite &enemie1, float &delta) {
 
 //onscreen control
 //    SDL_SetRenderDrawBlendMode(ren, SDL_BLENDMODE_BLEND);
-//    SDL_SetRenderDrawColor(ren, 100, 100, 100, 100); //onscreen dpad color
+//    SDL_SetRenderDrawColor(ren, 255, 100, 100, 100); //onscreen dpad color
 //    SDL_RenderFillRect(ren,&dpad );
 //
 //    SDL_SetRenderDrawColor(ren, 255, 0, 100, 255); //onscreen dpad color
@@ -110,20 +110,17 @@ void render(Sprite &player, Sprite &enemie1, float &delta) {
             }
         }
 
-        if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_A )&& p1_stats.powerup_status){
-
-
-            if(!p1_stats.powerup_fired){
-
-            powerup1_dstrect.y = player_hitbox.y - player.destRect.h;
-            powerup1_dstrect.x = player_hitbox.x;
-            }
-            p1_stats.powerup_fired= true;
-//            p1_stats.powerup_status= false;
-//    powerup1_dstrect.x+=speed*delta;
-
-
-        }
+//        if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_A )&& p1_stats.powerup_status){
+//
+//
+//            if(!p1_stats.powerup_fired){
+//
+//            powerup1_dstrect.y = player_hitbox.y - player.destRect.h;
+//            powerup1_dstrect.x = player_hitbox.x;
+//            }
+//            p1_stats.powerup_fired= true;
+//
+//        }
 
 
         if (!controller) {

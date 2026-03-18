@@ -22,12 +22,13 @@ void setup(Sprite &player , Sprite &enemie1 ) {
 
     SDL_GetRendererOutputSize(ren, &screen_width, &screen_height);
 
-    dpad  = {10, 405, 312, 312};//   dpad image hight and with and position crop image bysicly main postiion x and y for both dpad and src
+    dpad  = {10, screen_height/2, 312, 312};//   dpad image hight and with and position crop image bysicly main postiion x and y for both dpad and src
     dpad_src = {0, 300, 412,412 };// selection box for dpad
 
-    dpad_left  = {margin, dpad.y+130, size, size};
-    dpad_right = {margin + size*2, dpad.y+150, size, size};
-
+    dpad_left  = {margin, dpad.y+dpad.w/2, size, size};
+    dpad_left.y-=dpad_left.h/2;
+    dpad_right = {margin + size*2+15, dpad.y+dpad.w/2, size, size};
+    dpad_right.y-=dpad_right.h/2;
     dpad_up    = {margin + size, screen_height - size*3 - margin, size, size};
     dpad_down  = {margin + size, screen_height - size - margin, size, size};
 
@@ -52,9 +53,11 @@ void setup(Sprite &player , Sprite &enemie1 ) {
 
 
     brick_src = {0, 0, 812,280 };// for selection reactangle
-    brick_dstrect[0] = {screen_width-700, 190, 712,150 };// for image
-    brick_dstrect[1] = {-20, 190, 712,150 };// for image
-    brick_dstrect[2] = {(screen_width/2)-250, brick_dstrect[0].y+250, 712,150 };// for image
+    brick_dstrect[0] = {screen_width-700, screen_height/2-180, 712,150 };// for image
+    brick_dstrect[1] = {-20, brick_dstrect[0].y, 712,150 };// for image
+    brick_dstrect[2] = {(screen_width/2), brick_dstrect[0].y+250, 712,150 };// for image
+    brick_dstrect[2].x-=brick_dstrect[2].w/2;
+
 
     brick_dstrect_colustion[0] = {brick_dstrect[0].x, brick_dstrect[0].y,brick_dstrect[0].w ,5 };// for image
     brick_dstrect_colustion[1] = {brick_dstrect[1].x, brick_dstrect[1].y,brick_dstrect[1].w ,5 };// for image
@@ -123,7 +126,7 @@ void setup(Sprite &player , Sprite &enemie1 ) {
     player.destRect.y = wall_down.y-250;
 
     enemie1.destRect.x = 300;
-    enemie1.destRect.y = 50;
+    enemie1.destRect.y = brick_dstrect[1].y-enemie1.destRect.h;
 
     LOGI("hello this is setup");
 
