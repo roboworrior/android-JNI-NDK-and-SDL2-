@@ -6,7 +6,7 @@ void winingfun(std::string msg){
 
 
         SDL_RenderClear(ren);
-        SDL_SetRenderDrawColor(ren, 0, 0, 0, 255); //onscreen dpad color
+        SDL_SetRenderDrawColor(ren, 0, 0, 0, 50); //onscreen dpad color
 //        SDL_RenderCopy(ren,bg_texture,NULL,NULL);
 
 //        textSurface_win = TTF_RenderText_Blended(font_big,msg.c_str(),green );
@@ -14,7 +14,7 @@ void winingfun(std::string msg){
 
         winrect={50,50,textSurface_win->w,textSurface_win->h};
 
-    textTexture_win = SDL_CreateTextureFromSurface(ren, textSurface_win);
+        textTexture_win = SDL_CreateTextureFromSurface(ren, textSurface_win);
 
         SDL_FreeSurface(textSurface_win);
 
@@ -35,13 +35,38 @@ void winingfun(std::string msg){
 
 }
 
+void msg_fun(std::string msg,Uint32 time){
+
+    if(time > SDL_GetTicks()) {
+
+        SDL_SetRenderDrawBlendMode(ren, SDL_BLENDMODE_BLEND);
+        SDL_SetRenderDrawColor(ren, 100, 100, 100, 200); //onscreen dpad color
+
+        SDL_RenderFillRect(ren, &msg_box);
+
+        textSurface_win = TTF_RenderText_Blended_Wrapped(font_small, msg.c_str(), green,
+                                                         msg_box.w - 50);
+
+        winrect = {msg_box.x + 50, msg_box.y + 50, textSurface_win->w, textSurface_win->h};
+
+        textTexture_win = SDL_CreateTextureFromSurface(ren, textSurface_win);
+
+        SDL_FreeSurface(textSurface_win);
+        SDL_RenderCopy(ren, textTexture_win, NULL, &winrect);
+
+    }
+}
 
 void render(Sprite &player, Sprite &enemie1, float &delta) {
 
 
-    if(!p1_stats.player_win) {
 
         SDL_RenderClear(ren);
+
+
+
+    if(!p1_stats.player_win) {
+
         SDL_RenderCopy(ren, bg_texture, NULL, NULL);
 
         player.render(ren);   // draw on screen
@@ -60,18 +85,6 @@ void render(Sprite &player, Sprite &enemie1, float &delta) {
 
 
 //onscreen control
-//    SDL_SetRenderDrawBlendMode(ren, SDL_BLENDMODE_BLEND);
-//    SDL_SetRenderDrawColor(ren, 255, 100, 100, 100); //onscreen dpad color
-//
-//    SDL_SetRenderDrawColor(ren, 255, 0, 100, 255); //onscreen dpad color
-//    SDL_RenderFillRect(ren,&portel1 );
-//    SDL_RenderFillRect(ren,&brick_dstrect[0] );
-//
-//    SDL_RenderFillRect(ren,&brick_dstrect_colustion[1] );
-//    SDL_RenderFillRect(ren,&brick_dstrect_colustion[2] );
-//
-//    SDL_RenderFillRect(ren,&player_hitbox );
-//    SDL_RenderFillRect(ren,&player.destRect );
 
 
         SDL_RenderCopy(ren, itemTexture, &pipe_src, &pipe_dstrect);
@@ -122,11 +135,7 @@ void render(Sprite &player, Sprite &enemie1, float &delta) {
 //        }
 
 
-        if (!controller) {
-            SDL_RenderCopy(ren, dpad_texture, &dpad_src, &dpad);
-            SDL_RenderCopy(ren, dpad_texture, &dpad_btn_src, &dpad_btn);
-            SDL_RenderCopy(ren, dpad_texture, &dpad_close_src, &dpad_close);
-        }
+
 
 
         SDL_RenderCopy(ren, NULL, NULL, &wall_left);
@@ -146,6 +155,8 @@ void render(Sprite &player, Sprite &enemie1, float &delta) {
 
         //    fps text
     }
+
+
     else{
 //        LOGI("you win Lugi go to level 2");
         winingfun("You Win Congrets on clearing level 1 \n\n\nfor restart press [start] for quit press [select] \n this is a demo soon we will upload more levels ");
@@ -155,8 +166,15 @@ void render(Sprite &player, Sprite &enemie1, float &delta) {
     }
 
 
+    if (!controller) {
+        SDL_RenderCopy(ren, dpad_texture, &dpad_src, &dpad);
+        SDL_RenderCopy(ren, dpad_texture, &dpad_btn_src, &dpad_btn);
+        SDL_RenderCopy(ren, dpad_texture, &dpad_close_src, &dpad_close);
+    }
 
 
+
+    msg_fun("colllect all the coins to win the game",5000);
 
     SDL_RenderPresent(ren);
 

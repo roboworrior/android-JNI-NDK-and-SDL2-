@@ -21,7 +21,12 @@ extern TTF_Font* font_small;
 extern TTF_Font* font_big;
 extern SDL_Rect dpad_a;
 extern SDL_Rect dpad_b;
+extern SDL_Rect dpad_close_start;
 extern SDL_Rect dpad_close_input;
+extern Uint32 timer;
+extern SDL_Rect msg_box;
+
+
 
 struct Item {
     SDL_Rect item_dstrect;

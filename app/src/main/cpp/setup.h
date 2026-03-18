@@ -42,8 +42,9 @@ void setup(Sprite &player , Sprite &enemie1 ) {
     dpad_btn  = {screen_width-400, screen_height-350 , 312, 312};//   dpad image hight and with and position crop image bysicly main postiion x and y for both dpad and src
     dpad_btn_src = {600, 250, 412,412 };// selection box for dpad
 
-    dpad_close  = {700, 0 , 112, 112}; //for box rect main element x,y
-    dpad_close_src = {400, 400, 212,212 };// for image
+    dpad_close  = {screen_width/2, 0 , 300, 200}; //for box rect main element x,y
+    dpad_close.x-=dpad_close.w/2;
+    dpad_close_src = {0, 0, 400,250 };// for image
 
     pipe_src = {930, 330, 212,180 };// for selection reactangle
     pipe_dstrect = {-100, screen_height-220, 412,212 };// for image
@@ -63,6 +64,10 @@ void setup(Sprite &player , Sprite &enemie1 ) {
     brick_dstrect_colustion[0] = {brick_dstrect[0].x, brick_dstrect[0].y,brick_dstrect[0].w ,5 };// for image
     brick_dstrect_colustion[1] = {brick_dstrect[1].x, brick_dstrect[1].y,brick_dstrect[1].w ,5 };// for image
     brick_dstrect_colustion[2] = {brick_dstrect[2].x, brick_dstrect[2].y,brick_dstrect[2].w ,5 };// for image
+
+    msg_box={screen_width/2,screen_height/2,screen_width/2,screen_height/2};
+    msg_box.x-=msg_box.w/2;
+    msg_box.y-=msg_box.h/2;
 
 
 
@@ -111,7 +116,10 @@ void setup(Sprite &player , Sprite &enemie1 ) {
     dpad_a  = {dpad_btn.x+25, dpad_btn.y+145, size+20, size+21};
     dpad_b  = {dpad_btn.x+175, dpad_btn.y+145 , size+20, size+21};
 
-    dpad_close_input  = {dpad_close.x+15, dpad_close.y+10 , size, size};
+    dpad_close_input  = {dpad_close.x+25, dpad_close.y+25 , size, size};
+    dpad_close_start  = {dpad_close_input.x+size*2+15, dpad_close_input.y , size, size};
+//    dpad_close_input.x+=dpad_close_input.w;
+
 
     textRect = {50, 50,200, 50};
 
@@ -128,6 +136,8 @@ void setup(Sprite &player , Sprite &enemie1 ) {
 
     enemie1.destRect.x = 300;
     enemie1.destRect.y = brick_dstrect[1].y-enemie1.destRect.h;
+
+    timer=10000;
 
     LOGI("hello this is setup");
 

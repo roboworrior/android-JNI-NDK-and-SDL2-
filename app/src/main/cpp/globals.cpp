@@ -15,6 +15,7 @@ TTF_Font* font_big = nullptr;
 SDL_Rect dpad_a;
 SDL_Rect dpad_b;
 SDL_Rect dpad_close_input;
+SDL_Rect dpad_close_start;
 
 std::vector<Item> items;
 
@@ -25,6 +26,9 @@ SDL_Rect item1_src;
 SDL_Rect item1_dstrect;
 SDL_Rect powerup1_src;
 SDL_Rect powerup1_dstrect;
+
+
+
 
 SDL_Rect dpad_close;
 int score = 0;
@@ -58,7 +62,7 @@ SDL_Rect brick_dstrect_colustion[total_bricks];
 
 SDL_Color yellow = {255, 255, 0, 255};
 SDL_Color red = {255, 0, 0, 255};
-SDL_Color green = {0, 255, 0, 255};
+SDL_Color green = {0, 255, 0, 200};
 
 SDL_GameController *controller = nullptr;
 
@@ -79,6 +83,9 @@ SDL_Texture *playerTexture = nullptr;
 
 int screen_width = 0;
 int screen_height = 0;
+Uint32 timer=0;
+
+SDL_Rect msg_box;
 
 bool button_pressed = false;
 bool enemie_ai = false;

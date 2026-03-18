@@ -260,6 +260,12 @@ extern "C" int SDL_main(int argc, char *argv[]) {
                     cleanup();
 
                 }
+                if (SDL_PointInRect(&p, &dpad_close_start))
+                {
+                    LOGI("it the onscreen control button start");
+                    onscreen_control="btn_start";
+
+                }
 
 
             }
@@ -381,6 +387,7 @@ extern "C" int SDL_main(int argc, char *argv[]) {
         if(onscreen_control == "btn_start"){
 
             isMoving= true;
+            p1_stats.player_win= false;
             move(SDL_CONTROLLER_BUTTON_START,delta,player);
         }
 
@@ -423,6 +430,10 @@ extern "C" int SDL_main(int argc, char *argv[]) {
             p1_stats.player_win= true;
 
         }
+
+//        timer=SDL_GetTicks();
+//        LOGI("this is ticks :%d",timer);
+
 
     }
 
