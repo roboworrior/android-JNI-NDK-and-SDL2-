@@ -62,11 +62,10 @@ void render(Sprite &player, Sprite &enemie1, float &delta) {
 //onscreen control
 //    SDL_SetRenderDrawBlendMode(ren, SDL_BLENDMODE_BLEND);
 //    SDL_SetRenderDrawColor(ren, 255, 100, 100, 100); //onscreen dpad color
-//    SDL_RenderFillRect(ren,&dpad );
 //
 //    SDL_SetRenderDrawColor(ren, 255, 0, 100, 255); //onscreen dpad color
-//    SDL_RenderFillRect(ren,&dpad_left );
-//    SDL_RenderFillRect(ren,&dpad_right );
+//    SDL_RenderFillRect(ren,&portel1 );
+//    SDL_RenderFillRect(ren,&brick_dstrect[0] );
 //
 //    SDL_RenderFillRect(ren,&brick_dstrect_colustion[1] );
 //    SDL_RenderFillRect(ren,&brick_dstrect_colustion[2] );

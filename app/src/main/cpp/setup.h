@@ -53,7 +53,8 @@ void setup(Sprite &player , Sprite &enemie1 ) {
 
 
     brick_src = {0, 0, 812,280 };// for selection reactangle
-    brick_dstrect[0] = {screen_width-700, screen_height/2-180, 712,150 };// for image
+    brick_dstrect[0] = {screen_width, screen_height/2-180, 712,150 };// for image
+    brick_dstrect[0].x-=brick_dstrect[0].w;
     brick_dstrect[1] = {-20, brick_dstrect[0].y, 712,150 };// for image
     brick_dstrect[2] = {(screen_width/2), brick_dstrect[0].y+250, 712,150 };// for image
     brick_dstrect[2].x-=brick_dstrect[2].w/2;
@@ -70,7 +71,7 @@ void setup(Sprite &player , Sprite &enemie1 ) {
     item1_src = {130, 500, 170,170};// for selection reactangle
 
 
-    portel1={screen_width-10,0,10,200};
+    portel1={brick_dstrect[0].x+brick_dstrect[0].w-20,brick_dstrect[0].y-brick_dstrect[0].h,10,200};
 
 //    for(int i; i<total_bricks; i++){
 //        Coin coin;
