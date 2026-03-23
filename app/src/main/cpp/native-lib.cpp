@@ -388,7 +388,9 @@ extern "C" int SDL_main(int argc, char *argv[]) {
 
             isMoving= true;
             p1_stats.player_win= false;
+            p1_stats.msg_triggered= false;
             move(SDL_CONTROLLER_BUTTON_START,delta,player);
+            timer=SDL_GetTicks();
         }
 
         if(onscreen_control == "btn_close"){
@@ -423,12 +425,14 @@ extern "C" int SDL_main(int argc, char *argv[]) {
 //            LOGI("totla conis :%d",p1_stats.coins);
 
 
+//        current_time=SDL_GetTicks()-timer;
 
-        if(p1_stats.coins==items.size()-1 && enemie_dead== true ){
+        if(p1_stats.coins==items.size()-1 && enemie_dead== true &&!p1_stats.msg_triggered ){
 
+            p1_stats.msg_triggered= true;
             SDL_Delay(1000);
             p1_stats.player_win= true;
-
+            timer=SDL_GetTicks();
         }
 
 //        timer=SDL_GetTicks();

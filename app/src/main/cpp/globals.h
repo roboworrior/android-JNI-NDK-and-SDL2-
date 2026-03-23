@@ -24,6 +24,7 @@ extern SDL_Rect dpad_b;
 extern SDL_Rect dpad_close_start;
 extern SDL_Rect dpad_close_input;
 extern Uint32 timer;
+extern Uint32 current_time;
 extern SDL_Rect msg_box;
 
 
@@ -42,6 +43,7 @@ struct player_stats{
     bool player_win;
     bool powerup_status;
     bool powerup_fired;
+    bool msg_triggered= false;
     int score;
     int coins;
 

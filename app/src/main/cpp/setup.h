@@ -131,13 +131,13 @@ void setup(Sprite &player , Sprite &enemie1 ) {
     p1_stats.score=0;
     p1_stats.player_flip= false;
     p1_stats.player_win= false;
+
     player.destRect.x = screen_width/2;
     player.destRect.y = wall_down.y-250;
 
     enemie1.destRect.x = 300;
     enemie1.destRect.y = brick_dstrect[1].y-enemie1.destRect.h;
 
-    timer=10000;
 
     LOGI("hello this is setup");
 

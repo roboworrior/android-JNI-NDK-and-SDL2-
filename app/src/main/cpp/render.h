@@ -2,45 +2,14 @@
 #include "Sprite.h"
 
 
-void winingfun(std::string msg){
 
 
-        SDL_RenderClear(ren);
-        SDL_SetRenderDrawColor(ren, 0, 0, 0, 50); //onscreen dpad color
-//        SDL_RenderCopy(ren,bg_texture,NULL,NULL);
+void msg_fun(std::string msg){
 
-//        textSurface_win = TTF_RenderText_Blended(font_big,msg.c_str(),green );
-        textSurface_win = TTF_RenderText_Blended_Wrapped(font_big,msg.c_str(),green,screen_width );
-
-        winrect={50,50,textSurface_win->w,textSurface_win->h};
-
-        textTexture_win = SDL_CreateTextureFromSurface(ren, textSurface_win);
-
-        SDL_FreeSurface(textSurface_win);
-
-
-
-        if(SDL_GameControllerGetButton(controller,SDL_CONTROLLER_BUTTON_START)){
-
-            p1_stats.player_win= false;
-            LOGI("reseting game ok");
-        }
-
-
-
-
-        SDL_RenderCopy(ren, textTexture_win, NULL, &winrect);
-
-
-
-}
-
-void msg_fun(std::string msg,Uint32 time){
-
-    if(time > SDL_GetTicks()) {
 
         SDL_SetRenderDrawBlendMode(ren, SDL_BLENDMODE_BLEND);
-        SDL_SetRenderDrawColor(ren, 100, 100, 100, 200); //onscreen dpad color
+
+        SDL_SetRenderDrawColor(ren,0, 0, 0, 200); //onscreen dpad color
 
         SDL_RenderFillRect(ren, &msg_box);
 
@@ -54,7 +23,6 @@ void msg_fun(std::string msg,Uint32 time){
         SDL_FreeSurface(textSurface_win);
         SDL_RenderCopy(ren, textTexture_win, NULL, &winrect);
 
-    }
 }
 
 void render(Sprite &player, Sprite &enemie1, float &delta) {
@@ -122,19 +90,6 @@ void render(Sprite &player, Sprite &enemie1, float &delta) {
             }
         }
 
-//        if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_A )&& p1_stats.powerup_status){
-//
-//
-//            if(!p1_stats.powerup_fired){
-//
-//            powerup1_dstrect.y = player_hitbox.y - player.destRect.h;
-//            powerup1_dstrect.x = player_hitbox.x;
-//            }
-//            p1_stats.powerup_fired= true;
-//
-//        }
-
-
 
 
 
@@ -158,12 +113,35 @@ void render(Sprite &player, Sprite &enemie1, float &delta) {
 
 
     else{
-//        LOGI("you win Lugi go to level 2");
-        winingfun("You Win Congrets on clearing level 1 \n\n\nfor restart press [start] for quit press [select] \n this is a demo soon we will upload more levels ");
+        if(p1_stats.msg_triggered){
 
-//        winingfun("this is a demo ");
+        current_time = SDL_GetTicks() - timer;
+
+        if(current_time<=5000) {
+            msg_fun("You Win Congrets on clearing level 1");
+//            LOGI("this is 1 msg current timer %d:  ,timer :%d",current_time,timer);
+        }
+
+        if(current_time >(5000) && current_time<=(10000)) {
+            msg_fun("this is a demo soon we will upload more levels");
+//            LOGI("this is 2 msg current timer %d:  ,timer :%d",current_time,timer);
+        }
+        if(current_time >(10000) && !controller) {
+            msg_fun("for restart press [START] for quit press [X]");
+//            LOGI("this is 3 msg current timer %d:  ,timer :%d",current_time,timer);
+        }
+        if(current_time >(10000) && controller) {
+            msg_fun("for restart press [START] for quit press [SELECT]");
+//            LOGI("this is 3 msg current timer %d:  ,timer :%d",current_time,timer);
+        }
+
+        }
+
+
+
 
     }
+
 
 
     if (!controller) {
@@ -173,11 +151,14 @@ void render(Sprite &player, Sprite &enemie1, float &delta) {
     }
 
 
+    if(SDL_GetTicks()-timer<5000 && p1_stats.msg_triggered== false) {
 
-    msg_fun("colllect all the coins to win the game",5000);
+        msg_fun("colllect all the coins to win the game");
+    }
 
     SDL_RenderPresent(ren);
 
+  SDL_DestroyTexture(textTexture_win); // frame ke end pe texture destroy
     SDL_DestroyTexture(textTexture); // frame ke end pe texture destroy
-    SDL_DestroyTexture(textTexture_win); // frame ke end pe texture destroy
+
 }

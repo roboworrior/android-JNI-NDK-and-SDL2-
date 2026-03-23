@@ -84,6 +84,7 @@ SDL_Texture *playerTexture = nullptr;
 int screen_width = 0;
 int screen_height = 0;
 Uint32 timer=0;
+Uint32 current_time=0;
 
 SDL_Rect msg_box;
 
