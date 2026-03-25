@@ -38,10 +38,12 @@ void render(Sprite &player, Sprite &enemie1, float &delta) {
         SDL_RenderCopy(ren, bg_texture, NULL, NULL);
 
         player.render(ren);   // draw on screen
-        if (!enemie_dead) {
+    if (!enemie_dead) {
             enemie1.render(ren);   // draw on screen
-
         }
+
+
+
 
 
         player_hitbox = {

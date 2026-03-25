@@ -191,7 +191,8 @@ extern "C" int SDL_main(int argc, char *argv[]) {
 
 
     Sprite enemie1(enemie1Texture, 0, 0, 64, 64);
-    enemie1.addAnimation("walk", 0, 3,0.2f); // row 0, 4 frames, 0.1s per frame ( less speed value=== fash animetion play like 0.1f)
+    enemie1.addAnimation("walk", 0, 4,0.2f); // row 0, 4 frames, 0.1s per frame ( less speed value=== fash animetion play like 0.1f)
+    enemie1.addAnimation("death", 1, 4,0.2f); // row 0, 4 frames, 0.1s per frame ( less speed value=== fash animetion play like 0.1f)
 
     SDL_FreeSurface(bg);
 
@@ -418,8 +419,9 @@ extern "C" int SDL_main(int argc, char *argv[]) {
 
 
         if(SDL_HasIntersection(&powerup1_dstrect,&enemie1.destRect) && p1_stats.powerup_fired== true){
-            enemie_dead= true;
 
+
+            enemie_dead= true;
             LOGI("this sis deuck dead");
         }
 //            LOGI("totla conis :%d",p1_stats.coins);

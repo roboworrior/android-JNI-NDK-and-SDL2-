@@ -164,7 +164,11 @@ void move(int button_id, float &delta, Sprite &player) {
 }
 
 void enem_move(Sprite &enemie1, SDL_Rect &place, float &delta,Sprite &player){
+
+    if(!enemie_dead){
+
     enemie1.play("walk");
+    }
 
     if(SDL_HasIntersection(&player_hitbox , &enemie1.destRect) && !enemie_dead ) {
         LOGI("dont tuch me lugi ");
