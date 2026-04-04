@@ -19,6 +19,10 @@ SDL_Rect dpad_close_start;
 
 std::vector<Item> items;
 
+std::vector<Enemie> enemies;
+
+
+
 player_stats p1_stats;
 bool enemie_dead=false;
 SDL_Rect coin_src;
@@ -75,7 +79,9 @@ SDL_Surface* textSurface_win = nullptr;
 
 
 SDL_Texture *enemie1Texture = nullptr;
+
 SDL_Texture *itemTexture = nullptr;
+
 SDL_Surface* bg = nullptr;
 
 SDL_Texture *playerTexture = nullptr;

@@ -15,8 +15,16 @@
 #include "setup.h"
 #include "render.h"
 #include "move.h"
+#include "Enemie.h"
 
 
+//Enemie enem_duck("duck",brick_dstrect[1]);
+
+Uint32 stoptime=0;
+
+void reset(){
+    LOGI("thiss");
+}
 
 void cleanup()
 {
@@ -168,6 +176,7 @@ extern "C" int SDL_main(int argc, char *argv[]) {
     bg_texture = SDL_CreateTextureFromSurface(ren, bg);
 
 
+
     if (!playerTexture || !enemie1Texture) {
         LOGI("Failed to load playerr texture : %s", SDL_GetError());
         return 1;
@@ -191,6 +200,7 @@ extern "C" int SDL_main(int argc, char *argv[]) {
 
 
     Sprite enemie1(enemie1Texture, 0, 0, 64, 64);
+
     enemie1.addAnimation("walk", 0, 4,0.2f); // row 0, 4 frames, 0.1s per frame ( less speed value=== fash animetion play like 0.1f)
     enemie1.addAnimation("death", 1, 4,0.2f); // row 0, 4 frames, 0.1s per frame ( less speed value=== fash animetion play like 0.1f)
 
@@ -200,6 +210,8 @@ extern "C" int SDL_main(int argc, char *argv[]) {
     fpsTimer = SDL_GetTicks();
 
     setup(player,enemie1);
+
+
 
 
     //main game loop
@@ -334,10 +346,21 @@ extern "C" int SDL_main(int argc, char *argv[]) {
         }
 
 
+
+
         render(player,enemie1,delta);
+
+
         player.update(delta);  // animation update
 
+        for (auto &enemie: enemies) {
+            enemie.update(delta);
+        }
+
+
+
         if(!enemie_dead){
+
 //            enemie_dead= true;
             enemie1.update(delta);  // animation update
         }
@@ -387,9 +410,17 @@ extern "C" int SDL_main(int argc, char *argv[]) {
         }
         if(onscreen_control == "btn_start"){
 
+            //this is for reseting the game
             isMoving= true;
             p1_stats.player_win= false;
             p1_stats.msg_triggered= false;
+
+            for (auto &enemie: enemies)   {
+                enemie.enemie_dead= false;
+                enemie.enemie_moving= true;
+
+            }
+
             move(SDL_CONTROLLER_BUTTON_START,delta,player);
             timer=SDL_GetTicks();
         }
@@ -409,6 +440,13 @@ extern "C" int SDL_main(int argc, char *argv[]) {
 
 
         enem_move(enemie1,brick_dstrect[1],delta,player);
+        for (auto &enemie: enemies)   {
+            enemie.enemie_move(delta);
+
+        }
+
+
+
 
         if( p1_stats.powerup_fired== true){
 //        p1_stats.powerup_status= false;
@@ -419,29 +457,57 @@ extern "C" int SDL_main(int argc, char *argv[]) {
 
 
         if(SDL_HasIntersection(&powerup1_dstrect,&enemie1.destRect) && p1_stats.powerup_fired== true){
-
+            //this for kiling the duck with bullet checking colustion
 
             enemie_dead= true;
             LOGI("this sis deuck dead");
         }
-//            LOGI("totla conis :%d",p1_stats.coins);
 
+//            LOGI("totla conis :%d",p1_stats.coins);
 
 //        current_time=SDL_GetTicks()-timer;
 
         if(p1_stats.coins==items.size()-1 && enemie_dead== true &&!p1_stats.msg_triggered ){
 
+            //this is for wining the game if win do this
             p1_stats.msg_triggered= true;
             SDL_Delay(1000);
             p1_stats.player_win= true;
             timer=SDL_GetTicks();
         }
 
-//        timer=SDL_GetTicks();
-//        LOGI("this is ticks :%d",timer);
 
+
+        for (auto &enemie: enemies)   {
+
+            if(enemie.colution_player(player_hitbox)){
+                //class enemie colustion with player reset when true
+    //            move(6,delta,player);
+
+            }
+
+            if( enemie.colution_dead(powerup1_dstrect,timer)){
+
+                stoptime=SDL_GetTicks();
+                enemie.enemie_moving= false;
+
+            }
+
+
+            if(!enemie.enemie_moving){
+
+                enemie.playdead(stoptime,delta);
+
+            }
+        }
+
+
+
+//        LOGI("duck dead status :%d STOP TIME :%d",enem_duck.enemie_dead,stoptime);
 
     }
+
+
 
 
     cleanup();

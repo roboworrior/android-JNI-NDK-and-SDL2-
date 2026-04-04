@@ -30,15 +30,20 @@ void render(Sprite &player, Sprite &enemie1, float &delta) {
 
 
         SDL_RenderClear(ren);
+        SDL_RenderCopy(ren, bg_texture, NULL, NULL);
 
 
 
     if(!p1_stats.player_win) {
 
-        SDL_RenderCopy(ren, bg_texture, NULL, NULL);
+//        SDL_RenderCopy(ren, bg_texture, NULL, NULL);
+
+
+
 
         player.render(ren);   // draw on screen
-    if (!enemie_dead) {
+
+        if (!enemie_dead) {
             enemie1.render(ren);   // draw on screen
         }
 
@@ -55,6 +60,11 @@ void render(Sprite &player, Sprite &enemie1, float &delta) {
 
 
 //onscreen control
+
+        //    SDL_SetRenderDrawBlendMode(ren, SDL_BLENDMODE_BLEND);
+//    SDL_SetRenderDrawColor(ren, 100, 100, 100, 100); //onscreen dpad color
+//    SDL_RenderFillRect(ren,&dpad );
+
 
 
         SDL_RenderCopy(ren, itemTexture, &pipe_src, &pipe_dstrect);
@@ -77,6 +87,11 @@ void render(Sprite &player, Sprite &enemie1, float &delta) {
                 SDL_RenderCopy(ren, itemTexture, &item1_src, &item.item_dstrect);
             }
 
+
+        }
+        for (auto &enemie: enemies)   {
+
+            enemie.render();
 
         }
 

@@ -25,6 +25,7 @@ add_library(
         native-lib.cpp
         Sprite.cpp
         globals.cpp
+        Enemie.cpp
 
 )
 

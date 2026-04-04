@@ -21,7 +21,7 @@ void move(int button_id, float &delta, Sprite &player) {
               score+=100;
             }
 
-            LOGI("Player Score : %d",p1_stats.score);
+//            LOGI("Player Score : %d",p1_stats.score);
 
         }
 
@@ -92,6 +92,10 @@ void move(int button_id, float &delta, Sprite &player) {
         p1_stats.coins=0;
         p1_stats.powerup_status= false;
         p1_stats.powerup_fired= false;
+
+
+
+
 
         powerup1_dstrect.x=-100;
         powerup1_dstrect.y=-100;

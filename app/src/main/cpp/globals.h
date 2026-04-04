@@ -4,8 +4,10 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <string>
+#include "Enemie.h"
 #include <vector>
 #include "Sprite.h"
+
 
 extern SDL_Renderer *ren;
 extern SDL_Window *win;
@@ -26,6 +28,7 @@ extern SDL_Rect dpad_close_input;
 extern Uint32 timer;
 extern Uint32 current_time;
 extern SDL_Rect msg_box;
+
 
 
 
@@ -52,7 +55,12 @@ struct player_stats{
 
 extern player_stats p1_stats;
 
+
 extern std::vector<Item> items;
+
+extern std::vector<Enemie> enemies;
+
+
 
 extern SDL_Rect coin_src;
 extern SDL_Rect item1_src;

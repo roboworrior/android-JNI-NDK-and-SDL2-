@@ -61,6 +61,8 @@ void setup(Sprite &player , Sprite &enemie1 ) {
     brick_dstrect[2].x-=brick_dstrect[2].w/2;
 
 
+//    brick_dstrect[2].x+=400;
+
     brick_dstrect_colustion[0] = {brick_dstrect[0].x, brick_dstrect[0].y,brick_dstrect[0].w ,5 };// for image
     brick_dstrect_colustion[1] = {brick_dstrect[1].x, brick_dstrect[1].y,brick_dstrect[1].w ,5 };// for image
     brick_dstrect_colustion[2] = {brick_dstrect[2].x, brick_dstrect[2].y,brick_dstrect[2].w ,5 };// for image
@@ -96,8 +98,10 @@ void setup(Sprite &player , Sprite &enemie1 ) {
     Item c2;
     c2.item_collected= false;
     c2.type="coin";
+
     c2.item_dstrect = {100, brick_dstrect[0].y, 120,120 };// for image
     c2.item_dstrect.y-=c2.item_dstrect.h;
+
     items.push_back(c2);
 
     Item c3;
@@ -118,6 +122,7 @@ void setup(Sprite &player , Sprite &enemie1 ) {
 
     dpad_close_input  = {dpad_close.x+25, dpad_close.y+25 , size, size};
     dpad_close_start  = {dpad_close_input.x+size*2+15, dpad_close_input.y , size, size};
+
 //    dpad_close_input.x+=dpad_close_input.w;
 
 
@@ -142,6 +147,13 @@ void setup(Sprite &player , Sprite &enemie1 ) {
     LOGI("hello this is setup");
 
 //    winrect={0,50,100,100};
+
+    for(int i=0;i<total_bricks;i++) {
+        Enemie enem("duck",brick_dstrect[i]);
+
+        enem.enemie_sprite.destRect.x+=i*speed;
+        enemies.push_back(enem);
+    }
 
 
 }
