@@ -86,18 +86,13 @@ float delta_fun() {
 void inair(Sprite &player,float  &delta){
 //    LOGI(" on air is : %d",player_onair);
 
-player_onair= true;
-for(int i=0;i<total_bricks;i++) {
-
-
-    if (SDL_HasIntersection(&player_hitbox, &brick_dstrect_colustion[i])) {
-
-        player_onair = false;
-
-        break;
+    player_onair= true;
+    for (auto &tile: tiles) {
+        if (SDL_HasIntersection(&player_hitbox, &tile.dest) && tile.type=="brick") {
+            player_onair = false;
+        }
     }
 
-}
 
     if(player.destRect.y == wall_down.y-player.destRect.h  ){
 
@@ -348,7 +343,6 @@ extern "C" int SDL_main(int argc, char *argv[]) {
 
 
 
-        render(player,enemie1,delta);
 
 
         player.update(delta);  // animation update
@@ -365,6 +359,8 @@ extern "C" int SDL_main(int argc, char *argv[]) {
             enemie1.update(delta);  // animation update
         }
 
+
+        render(player,enemie1,delta);
 
 //        enemie1.update(delta);  // animation update
 
@@ -501,6 +497,7 @@ extern "C" int SDL_main(int argc, char *argv[]) {
             }
         }
 
+//        LOGI("score is : %d",p1_stats.score);
 
 
 //        LOGI("duck dead status :%d STOP TIME :%d",enem_duck.enemie_dead,stoptime);

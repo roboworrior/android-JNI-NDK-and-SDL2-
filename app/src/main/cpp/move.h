@@ -6,9 +6,9 @@ void move(int button_id, float &delta, Sprite &player) {
 
     //colustions
 
-    for(auto &item :items){
+    for(auto &item :tiles){
 
-        if(!item.item_collected && SDL_HasIntersection(&player.destRect, &item.item_dstrect)){
+        if(!item.item_collected && SDL_HasIntersection(&player.destRect, &item.dest)){
             item.item_collected= true;
 
             if(item.type == "coin"){
@@ -18,10 +18,10 @@ void move(int button_id, float &delta, Sprite &player) {
             }
             if(item.type == "powerup"){
               p1_stats.powerup_status= true;
-              score+=100;
+                p1_stats.score+=100;
             }
 
-//            LOGI("Player Score : %d",p1_stats.score);
+            LOGI("Player Score : %d",p1_stats.score);
 
         }
 
@@ -57,10 +57,10 @@ void move(int button_id, float &delta, Sprite &player) {
 
 
     if(SDL_HasIntersection(&player_hitbox , &pipe_dstrect) ){
-        LOGI("this is pipe");
+//        LOGI("this is pipe");
 
-        player.destRect.y=(brick_dstrect[0].y-250);
-        player.destRect.x=screen_width-200;
+//        player.destRect.y=(brick_dstrect[0].y-250);
+//        player.destRect.x=screen_width-200;
 
 
     }

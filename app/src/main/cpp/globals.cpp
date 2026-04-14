@@ -20,10 +20,16 @@ SDL_Rect dpad_close_start;
 std::vector<Item> items;
 
 std::vector<Enemie> enemies;
-
+std::vector<Brick> bricks;
 
 
 player_stats p1_stats;
+
+Tile_obj tile_brick;
+std::vector<Tile_obj> tiles;
+
+
+
 bool enemie_dead=false;
 SDL_Rect coin_src;
 SDL_Rect item1_src;

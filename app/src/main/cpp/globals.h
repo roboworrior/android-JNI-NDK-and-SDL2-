@@ -3,10 +3,11 @@
 
 #include <SDL.h>
 #include <SDL_ttf.h>
-#include <string>
 #include "Enemie.h"
 #include <vector>
 #include "Sprite.h"
+#include <string>
+using namespace std;
 
 
 extern SDL_Renderer *ren;
@@ -38,6 +39,13 @@ struct Item {
     std::string type;
 };
 
+struct Brick {
+    SDL_Rect dest;
+    SDL_Rect src;
+
+};
+
+
 
 struct player_stats{
     int lifes;
@@ -46,19 +54,48 @@ struct player_stats{
     bool player_win;
     bool powerup_status;
     bool powerup_fired;
+    bool level_render;
     bool msg_triggered= false;
     int score;
     int coins;
 
 
 };
-
 extern player_stats p1_stats;
 
 
+
+struct vector2 {
+    int x;
+    int y;
+
+};
+struct Tile_obj {
+
+    string id;
+    SDL_Rect dest;
+    SDL_Rect src;
+    std::string type;
+    vector2 go_to={0,0,};
+
+    bool item_collected= false;
+
+
+};
+
+
+
+extern Tile_obj tile_brick;
+
+
+extern std::vector<Tile_obj> tiles;
+
+
+extern std::vector<Item> items;
 extern std::vector<Item> items;
 
 extern std::vector<Enemie> enemies;
+extern std::vector<Brick> bricks;
 
 
 

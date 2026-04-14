@@ -3,7 +3,6 @@
 
 
 
-
 void msg_fun(std::string msg){
 
 
@@ -32,23 +31,106 @@ void render(Sprite &player, Sprite &enemie1, float &delta) {
         SDL_RenderClear(ren);
         SDL_RenderCopy(ren, bg_texture, NULL, NULL);
 
+//        SDL_RenderFillRect(ren,&tile_brick.tile_dest );
 
 
-    if(!p1_stats.player_win) {
+
+//        SDL_RenderCopy(ren, itemTexture, &tiles[0].src, &tiles[0].dest);
+
+//            LOGI("screen width : %d and screen height : %d",screen_width,screen_height);
+
+    for (auto &tile: tiles) {
+        if(tile.type=="brick"){
+           SDL_RenderCopy(ren, itemTexture, &tile.src, &tile.dest);
+//            LOGI("tile type is : %s",(tile.type).c_str());
+
+        }
+        if(tile.type=="portal") {
+
+//            LOGI("tile type is : %s",(tile.type).c_str());
+            pipe_dstrect.x=tile.dest.x;
+            pipe_dstrect.y=tile.dest.y;
+
+            if(tile.dest.x >screen_width/2){
+//                LOGI("this is flip");
+                pipe_dstrect.x-=80;
+                pipe_dstrect.y-=20;
+                pipe_dstrect.h=250;
+                pipe_dstrect.w=250;
+
+                SDL_RenderCopyEx(ren, itemTexture, &pipe_src, &pipe_dstrect,NULL,0,SDL_FLIP_HORIZONTAL);
+            }
+            if(tile.dest.x <screen_width/2){
+                SDL_RenderCopyEx(ren, itemTexture, &pipe_src, &pipe_dstrect,NULL,0,SDL_FLIP_NONE);
+
+
+            }
+
+
+//            SDL_SetRenderDrawBlendMode(ren, SDL_BLENDMODE_BLEND);
+//            SDL_SetRenderDrawColor(ren, 200, 100, 100, 100); //onscreen dpad color
+//            SDL_RenderFillRect(ren,&tile.dest);
+
+            if(SDL_HasIntersection(&player_hitbox,&tile.dest) ){
+                player.destRect.x=tile.go_to.x;
+                player.destRect.y=tile.go_to.y;
+
+//                LOGI("tile id is :%s",(tile.id).c_str());
+//                LOGI("tile goto  is :%d",tile.go_to.x);
+            }
+
+        }
+
+
+
+        if (!tile.item_collected && tile.type == "coin") {
+            SDL_RenderCopy(ren, itemTexture, &tile.src, &tile.dest);
+        }
+
+        if (!tile.item_collected && tile.type == "powerup") {
+
+            //its the mystry box use for power ups
+            SDL_RenderCopy(ren, itemTexture, &tile.src, &tile.dest);
+
+        }
+
+        if (tile.item_collected && tile.type == "powerup" && p1_stats.powerup_status == true) {
+
+//            LOGI("this is powerup x :%d and y : %d ",&powerup1_dstrect.x,&powerup1_dstrect.y);
+            SDL_RenderCopy(ren, itemTexture, &powerup1_src, &powerup1_dstrect);
+
+        }
+
+        if(tile.type=="enemie"){
+            enemies[0].render();
+        }
+    }
+
+
+//    SDL_RenderCopy(ren, itemTexture, &powerup1_src, NULL);
+
+
+    player.render(ren);   // draw on screen
+    player_hitbox = {
+            player.destRect.x + 20,
+            player.destRect.y + player.destRect.h - 10,
+            player.destRect.w - 80,
+            10
+    };
+
+
+
+
+
+    if(!p1_stats.player_win ) {
 
 //        SDL_RenderCopy(ren, bg_texture, NULL, NULL);
-
-
-
 
         player.render(ren);   // draw on screen
 
         if (!enemie_dead) {
             enemie1.render(ren);   // draw on screen
         }
-
-
-
 
 
         player_hitbox = {
@@ -67,6 +149,7 @@ void render(Sprite &player, Sprite &enemie1, float &delta) {
 
 
 
+
         SDL_RenderCopy(ren, itemTexture, &pipe_src, &pipe_dstrect);
 
         SDL_RenderCopy(ren, itemTexture, &brick_src, &brick_dstrect[0]);
@@ -76,19 +159,8 @@ void render(Sprite &player, Sprite &enemie1, float &delta) {
 
 //    SDL_RenderCopy(ren, itemTexture, &item1_src , &item1_dstrect);
 
-        for (auto &item: items) {
-
-            if (!item.item_collected && item.type == "coin") {
-                SDL_RenderCopy(ren, itemTexture, &coin_src, &item.item_dstrect);
-            }
-            if (!item.item_collected && item.type == "powerup") {
-
-                //its the mystry box use for power ups
-                SDL_RenderCopy(ren, itemTexture, &item1_src, &item.item_dstrect);
-            }
 
 
-        }
         for (auto &enemie: enemies)   {
 
             enemie.render();
@@ -99,12 +171,11 @@ void render(Sprite &player, Sprite &enemie1, float &delta) {
 
             if (item.item_collected && item.type == "powerup" && p1_stats.powerup_status == true) {
 
-
 //            LOGI("this is powerup x :%d and y : %d ",&powerup1_dstrect.x,&powerup1_dstrect.y);
                 SDL_RenderCopy(ren, itemTexture, &powerup1_src, &powerup1_dstrect);
 
-
             }
+
         }
 
 
@@ -130,7 +201,7 @@ void render(Sprite &player, Sprite &enemie1, float &delta) {
 
 
     else{
-        if(p1_stats.msg_triggered){
+        if(!p1_stats.msg_triggered && !p1_stats.player_win){
 
         current_time = SDL_GetTicks() - timer;
 
@@ -170,7 +241,7 @@ void render(Sprite &player, Sprite &enemie1, float &delta) {
 
     if(SDL_GetTicks()-timer<5000 && p1_stats.msg_triggered== false) {
 
-        msg_fun("colllect all the coins to win the game");
+//        msg_fun("colllect all the coins to win the game");
     }
 
     SDL_RenderPresent(ren);
